@@ -9,6 +9,7 @@ Console.WriteLine("4 Remove employee");
 Console.WriteLine("5 Add employee's leave");
 Console.WriteLine("6 Display all leaves");
 Console.WriteLine("7 Remove leave");
+Console.WriteLine("8 Edit leave");
 Console.WriteLine(" To exit insert 'x'");
 
 var userInput = Console.ReadLine();
@@ -74,6 +75,16 @@ while (true)
             if (intOfLeaveToRemove != 0)
             {
                 allLeavesInStorage.RemoveLeave(intOfLeaveToRemove);
+            }
+            break;
+        case "8":
+            Console.WriteLine("Insert id");
+            var idOfLeaveToEdit = (Console.ReadLine() ?? "0");
+            int intOfLeaveToEdit;
+            bool ____ = int.TryParse(idOfLeaveToEdit, out intOfLeaveToEdit);
+            if (intOfLeaveToEdit != 0)
+            {
+                allLeavesInStorage.EditLeave(intOfLeaveToEdit);
             }
             break;
         case "x":

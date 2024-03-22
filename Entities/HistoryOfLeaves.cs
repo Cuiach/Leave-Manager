@@ -80,5 +80,38 @@ namespace Inewi_Console.Entities
                 Leaves.Remove(leaveToRemove);
             }
         }
+        public void EditLeave(int intOfLeaveToEdit)
+        {
+            var leaveToEdit = Leaves.FirstOrDefault(c => c.Id == intOfLeaveToEdit);
+            if (leaveToEdit == null)
+            {
+                Console.WriteLine("Leave not found");
+            }
+            else
+            {
+                Console.WriteLine("Put correct date of beginning of leave (or put any letter to skip)");
+                if (DateTime.TryParse(Console.ReadLine(), out DateTime userDateTimeFrom))
+                {
+                    Console.WriteLine("The day of the week is: " + userDateTimeFrom.DayOfWeek);
+                    leaveToEdit.DateFrom = userDateTimeFrom;
+                }
+                else
+                {
+                    Console.WriteLine("You skipped editing date 'from'");
+                }
+
+                Console.WriteLine("Put correct date of end of leave (or put any letter to skip)");
+                if (DateTime.TryParse(Console.ReadLine(), out DateTime userDateTimeTo))
+                {
+                    Console.WriteLine("The day of the week is: " + userDateTimeTo.DayOfWeek);
+                    leaveToEdit.DateTo = userDateTimeTo;
+                }
+                else
+                {
+                    Console.WriteLine("You skipped editing date 'to'");
+                }
+
+            }
+        }
     }
 }
