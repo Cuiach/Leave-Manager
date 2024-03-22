@@ -12,7 +12,7 @@
         {
             Console.WriteLine($"Employee: {employee.FirstName}, {employee.LastName}, {employee.Id}");
         }
-        private static void DisplayEmployeesDetails(List<Employee> employees)
+        private static void DisplayAllEmployeesDetails(List<Employee> employees)
         {
             foreach (var employee in employees)
             {
@@ -33,7 +33,7 @@
         }
         public void DisplayAllEmployees()
         {
-            DisplayEmployeesDetails(Employees);
+            DisplayAllEmployeesDetails(Employees);
         }
         public void DisplayMatchingEmployees(string searchPhrase)
         {
@@ -47,7 +47,7 @@
                         
             if (matchingEmployees != null && matchingEmployees.Count != 0)
             {
-                DisplayEmployeesDetails(matchingEmployees);
+                DisplayAllEmployeesDetails(matchingEmployees);
             } else
             {
                 Console.WriteLine("No employees were found");

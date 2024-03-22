@@ -6,18 +6,21 @@ Console.WriteLine("1 Add employee");
 Console.WriteLine("2 Display all employees");
 Console.WriteLine("3 Search employee");
 Console.WriteLine("4 Remove employee");
+Console.WriteLine("5 Add employee's leave");
+Console.WriteLine("6 Display all leaves");
+Console.WriteLine("7 Remove leave");
 Console.WriteLine(" To exit insert 'x'");
 
 var userInput = Console.ReadLine();
 
 var listOfEmployees = new ListOfEmployees();
+var allLeavesInStorage = new HistoryOfLeaves();
 
 while (true)
 {
     switch (userInput)
     {
         case "1":
-
             Console.WriteLine("Insert first name");
             var firstName = Console.ReadLine();
             Console.WriteLine("Insert last name");
@@ -42,12 +45,35 @@ while (true)
             break;
         case "4":
             Console.WriteLine("Insert id");
-            var nameToRemove = (Console.ReadLine() ?? "0");
+            var idToRemove = (Console.ReadLine() ?? "0");
             int intToRemove;
-            bool _ = int.TryParse(nameToRemove, out intToRemove);
+            bool _ = int.TryParse(idToRemove, out intToRemove);
             if (intToRemove != 0)
             {
                 listOfEmployees.RemoveEmployee(intToRemove);
+            }
+            break;
+        case "5":
+            Console.WriteLine("Insert employee's id");
+            var employeeIdAsString = (Console.ReadLine() ?? "0");
+            int employeeId;
+            bool __ = int.TryParse(employeeIdAsString, out employeeId);
+            if (employeeId != 0)
+            {
+                allLeavesInStorage.AddLeave(employeeId);
+            }
+            break;
+        case "6":
+            allLeavesInStorage.DisplayAllLeaves();
+            break;
+        case "7":
+            Console.WriteLine("Insert id");
+            var idOfLeaveToRemove = (Console.ReadLine() ?? "0");
+            int intOfLeaveToRemove;
+            bool ___ = int.TryParse(idOfLeaveToRemove, out intOfLeaveToRemove);
+            if (intOfLeaveToRemove != 0)
+            {
+                allLeavesInStorage.RemoveLeave(intOfLeaveToRemove);
             }
             break;
         case "x":
