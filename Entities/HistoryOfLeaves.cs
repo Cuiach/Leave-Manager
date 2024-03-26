@@ -10,9 +10,9 @@ namespace Inewi_Console.Entities
             int lastAddedLeaveId = Leaves.Count == 0 ? 0 : Leaves.LastOrDefault().Id;
 
             var leave = new Leave(employeeId, lastAddedLeaveId + 1);
-            Console.WriteLine("Default leave dates are set to: from {0}, to {1}. Do you want to change them? (y/n)", leave.DateFrom, leave.DateTo);
+            Console.WriteLine("Default leave dates are set to: from {0}, to {1}. Do you want to keep them? Press enter if yes. Put n and enter if you want to set the dates manually", leave.DateFrom, leave.DateTo);
             //Console.WriteLine("Default leave dates are set to: from {0:dd-MM-yyyy}, to {1:dd-MM-yyyy}. Do you want to change them? (y/n)", leave.DateFrom, leave.DateTo);
-            if (Console.ReadLine() == "y")
+            if (Console.ReadLine() == "n")
             {
                 Console.WriteLine("Put date - beginning of leave");
                 if (DateTime.TryParse(Console.ReadLine(), out DateTime userDateTimeFrom))
@@ -35,14 +35,22 @@ namespace Inewi_Console.Entities
                 {
                     Console.WriteLine("You have entered an incorrect value.");
                 }
-
             }
+            
+            Console.WriteLine("Is this leave On Demand? (click y or enter to skip)");
+            if (Console.ReadLine() == "y")
+            {
+                leave.IsOnDemand = true;
+            }
+            
             Leaves.Add(leave);
         }
 
         private static void DisplayLeaveDetails(Leave leave)
         {
-            Console.WriteLine($"Leave details Id={leave.Id}, Employee Id={leave.EmployeeId}, leave from: {leave.DateFrom}, leave to: {leave.DateTo}");
+            string onDemand = "ON DEMAND";
+            string notOnDemand = "NOT On Demand";
+            Console.WriteLine($"Leave details Id={leave.Id}, Employee Id={leave.EmployeeId}, leave from: {leave.DateFrom}, leave to: {leave.DateTo}, on demand? {(leave.IsOnDemand ? onDemand : notOnDemand)}");
         }
         private static void DisplayAllLeavesDetails(List<Leave> leaves)
         {
@@ -80,6 +88,7 @@ namespace Inewi_Console.Entities
                 Leaves.Remove(leaveToRemove);
             }
         }
+
         public void EditLeave(int intOfLeaveToEdit)
         {
             var leaveToEdit = Leaves.FirstOrDefault(c => c.Id == intOfLeaveToEdit);
@@ -111,6 +120,23 @@ namespace Inewi_Console.Entities
                     Console.WriteLine("You skipped editing date 'to'");
                 }
 
+                Console.WriteLine("Do you want to set this leave On Demand or Not On Demand? (click \n y = On Demand, \n n = NOT On Demand \n put another letter to skip)");
+                string? choice = StaticMethods.GetChoice();
+                if (choice == "y")
+                {
+                    leaveToEdit.IsOnDemand = true;
+                    Console.WriteLine("Leave is set as ON DEMAND");
+                }
+                else if (choice == "n")
+                {
+                    leaveToEdit.IsOnDemand = false;
+                    Console.WriteLine("Leave is set as NOT On Demand");
+                }
+
+                else 
+                {
+                    Console.WriteLine("You skipped editing On Demand");
+                }
             }
         }
     }

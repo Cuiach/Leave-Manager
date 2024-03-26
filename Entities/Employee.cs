@@ -7,7 +7,5 @@
         public string LastName { get; set; } = lName;
         public int? WorkingYears { get; set; }
         public EmployeeSettings? Setting { get; set; }
-
-        //public void SetId() => Id = (Employees == null ? 1 : Employees.LastOrDefault().Id + 1);
     }
 }

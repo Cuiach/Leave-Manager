@@ -10,6 +10,7 @@ Console.WriteLine("5 Add employee's leave");
 Console.WriteLine("6 Display all leaves");
 Console.WriteLine("7 Remove leave");
 Console.WriteLine("8 Edit leave");
+Console.WriteLine("9 Edit employee's settings");
 Console.WriteLine(" To exit insert 'x'");
 
 var userInput = Console.ReadLine();
@@ -22,19 +23,7 @@ while (true)
     switch (userInput)
     {
         case "1":
-            Console.WriteLine("Insert first name");
-            var firstName = Console.ReadLine();
-            Console.WriteLine("Insert last name");
-            var lastName = Console.ReadLine();
-            if (firstName != null && lastName != null)
-            {
-                int idNewEmployee = listOfEmployees.Employees.Count == 0 ? 1 : listOfEmployees.Employees.LastOrDefault().Id + 1;
-                
-                var newContact = new Employee(firstName, lastName, idNewEmployee);
-
-                listOfEmployees.AddEmployee(newContact);
-            }
-
+            listOfEmployees.AddEmployee();
             break;
         case "2":
             listOfEmployees.DisplayAllEmployees();
@@ -85,6 +74,16 @@ while (true)
             if (intOfLeaveToEdit != 0)
             {
                 allLeavesInStorage.EditLeave(intOfLeaveToEdit);
+            }
+            break;
+        case "9":
+            Console.WriteLine("Insert id");
+            var idOfEmployeeToEdit = (Console.ReadLine() ?? "0");
+            int intOfEmployeeToEdit;
+            bool _____ = int.TryParse(idOfEmployeeToEdit, out intOfEmployeeToEdit);
+            if (intOfEmployeeToEdit != 0)
+            {
+                listOfEmployees.EditSettings(intOfEmployeeToEdit);
             }
             break;
         case "x":
