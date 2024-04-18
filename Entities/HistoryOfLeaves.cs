@@ -1,81 +1,84 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace Inewi_Console.Entities
 {
     public class HistoryOfLeaves
     {
         public List<Leave> Leaves { get; set; } = [];
-        public void AddLeave(int employeeId)
-        {
-            int lastAddedLeaveId = Leaves.Count == 0 ? 0 : Leaves.LastOrDefault().Id;
-
-            var leave = new Leave(employeeId, lastAddedLeaveId + 1);
-            Console.WriteLine("Default leave dates are set to: from {0}, to {1}. Do you want to keep them? Press enter if yes. Put n and enter if you want to set the dates manually", leave.DateFrom, leave.DateTo);
-            //Console.WriteLine("Default leave dates are set to: from {0:dd-MM-yyyy}, to {1:dd-MM-yyyy}. Do you want to change them? (y/n)", leave.DateFrom, leave.DateTo);
-            if (Console.ReadLine() == "n")
-            {
-                Console.WriteLine("Put date - beginning of leave");
-                if (DateTime.TryParse(Console.ReadLine(), out DateTime userDateTimeFrom))
-                {
-                    Console.WriteLine("The day of the week is: " + userDateTimeFrom.DayOfWeek);
-                    leave.DateFrom = userDateTimeFrom;
-                }
-                else
-                {
-                    Console.WriteLine("You have entered an incorrect value.");
-                }
-
-                Console.WriteLine("Put date - end of leave");
-                if (DateTime.TryParse(Console.ReadLine(), out DateTime userDateTimeTo))
-                {
-                    Console.WriteLine("The day of the week is: " + userDateTimeTo.DayOfWeek);
-                    leave.DateTo = userDateTimeTo;
-                }
-                else
-                {
-                    Console.WriteLine("You have entered an incorrect value.");
-                }
-            }
-            
-            Console.WriteLine("Is this leave On Demand? (click y or enter to skip)");
-            if (Console.ReadLine() == "y")
-            {
-                leave.IsOnDemand = true;
-            }
-            
-            Leaves.Add(leave);
-        }
-
         private static void DisplayLeaveDetails(Leave leave)
         {
             string onDemand = "ON DEMAND";
             string notOnDemand = "NOT On Demand";
-            Console.WriteLine($"Leave details Id={leave.Id}, Employee Id={leave.EmployeeId}, leave from: {leave.DateFrom}, leave to: {leave.DateTo}, on demand? {(leave.IsOnDemand ? onDemand : notOnDemand)}");
+            Console.WriteLine($"Leave details Id={leave.Id}, Employee Id={leave.EmployeeId}, leave from: {leave.DateFrom}, leave to: {leave.DateTo}, {(leave.IsOnDemand ? onDemand : notOnDemand)}");
         }
-        private static void DisplayAllLeavesDetails(List<Leave> leaves)
+        private static void DisplayLeaves(List<Leave> SetOfLeaves)
         {
-            foreach (var leave in leaves)
+            foreach (var leave in SetOfLeaves)
             {
                 DisplayLeaveDetails(leave);
             }
         }
-        public void DisplayLeave(int number)
+        public bool CheckOverlapping(Leave leave)
         {
-            var leave = Leaves.FirstOrDefault(c => c.Id == number);
-            if (leave == null)
+            List<Leave> leavesOverlapping = Leaves.Where
+                (l => l.EmployeeId == leave.EmployeeId).Where
+                (l => l.DateTo >= leave.DateFrom).Where
+                (l => l.DateFrom <= leave.DateTo).ToList();
+
+            if (leavesOverlapping.Count > 0)
             {
-                Console.WriteLine("Leave not found");
+                Console.Write("Overlapping: ");
+                foreach (Leave l in leavesOverlapping)
+                {
+                    DisplayLeaveDetails(l);
+                }
+                return false;
+            }
+            return true;
+        }
+        public void AddLeave(Leave leave, int ommitterOnDemandAsk)
+        {
+            if (leave.DateFrom.Year == DateTime.Now.Year && ommitterOnDemandAsk == 1)
+            {
+                Console.WriteLine("Is this leave On Demand? (click y or enter to skip)");
+                if (Console.ReadLine() == "y")
+                {
+                    leave.IsOnDemand = true;
+                }
+            }
+
+            if (CheckOverlapping(leave))
+            {
+                Leaves.Add(leave);
             }
             else
             {
-                DisplayLeaveDetails(leave);
+                Console.WriteLine("Leave cannot be added. Try again with correct dates.");
             }
         }
         public void DisplayAllLeaves()
         {
-            DisplayAllLeavesDetails(Leaves);
+            DisplayLeaves(Leaves);
         }
-
+        public void DisplayAllLeavesOnDemand()
+        {
+            var onDemandLeaves = Leaves.Where(l => l.IsOnDemand);
+            DisplayLeaves((List<Leave>)onDemandLeaves);
+        }
+        public void DisplayAllLeavesForEmployee(int employeeId)
+        {
+            var leavesOfEmployee = Leaves.Where(l => l.EmployeeId == employeeId);
+            DisplayLeaves((List<Leave>)leavesOfEmployee);
+        }
+        public void DisplayAllLeavesForEmployeeOnDemand(int employeeId)
+        {
+            var leavesOfEmployeeOnDemand = Leaves.Where
+                (l => l.EmployeeId == employeeId).Where
+                (l => l.IsOnDemand);
+            DisplayLeaves((List<Leave>)leavesOfEmployeeOnDemand);
+        }
         public void RemoveLeave(int intOfLeaveToRemove)
         {
             var leaveToRemove = Leaves.FirstOrDefault(c => c.Id == intOfLeaveToRemove);
@@ -88,56 +91,41 @@ namespace Inewi_Console.Entities
                 Leaves.Remove(leaveToRemove);
             }
         }
-
-        public void EditLeave(int intOfLeaveToEdit)
+        public int GetSumOfDaysOnLeaveTakenByEmployeeInYear(int employeeId, int year)
         {
-            var leaveToEdit = Leaves.FirstOrDefault(c => c.Id == intOfLeaveToEdit);
-            if (leaveToEdit == null)
+            var sumOfLeaveDays = 0;
+            foreach (var leave in Leaves)
             {
-                Console.WriteLine("Leave not found");
-            }
-            else
-            {
-                Console.WriteLine("Put correct date of beginning of leave (or put any letter to skip)");
-                if (DateTime.TryParse(Console.ReadLine(), out DateTime userDateTimeFrom))
+                if (leave.EmployeeId == employeeId && leave.DateFrom.Year == year)
                 {
-                    Console.WriteLine("The day of the week is: " + userDateTimeFrom.DayOfWeek);
-                    leaveToEdit.DateFrom = userDateTimeFrom;
-                }
-                else
-                {
-                    Console.WriteLine("You skipped editing date 'from'");
-                }
-
-                Console.WriteLine("Put correct date of end of leave (or put any letter to skip)");
-                if (DateTime.TryParse(Console.ReadLine(), out DateTime userDateTimeTo))
-                {
-                    Console.WriteLine("The day of the week is: " + userDateTimeTo.DayOfWeek);
-                    leaveToEdit.DateTo = userDateTimeTo;
-                }
-                else
-                {
-                    Console.WriteLine("You skipped editing date 'to'");
-                }
-
-                Console.WriteLine("Do you want to set this leave On Demand or Not On Demand? (click \n y = On Demand, \n n = NOT On Demand \n put another letter to skip)");
-                string? choice = StaticMethods.GetChoice();
-                if (choice == "y")
-                {
-                    leaveToEdit.IsOnDemand = true;
-                    Console.WriteLine("Leave is set as ON DEMAND");
-                }
-                else if (choice == "n")
-                {
-                    leaveToEdit.IsOnDemand = false;
-                    Console.WriteLine("Leave is set as NOT On Demand");
-                }
-
-                else 
-                {
-                    Console.WriteLine("You skipped editing On Demand");
+                    sumOfLeaveDays += StaticMethods.CountLeaveLength(leave);
                 }
             }
+            return sumOfLeaveDays;
+        }
+        public int GetSumOnDemand(int employeeId)
+        {
+            var sumOfOnDemandDays = 0;
+            foreach (Leave leave in Leaves)
+            {
+                if (leave.EmployeeId == employeeId && leave.DateFrom.Year == DateTime.Now.Year && leave.IsOnDemand == true)
+                {
+                    sumOfOnDemandDays += StaticMethods.CountLeaveLength(leave);
+                }
+            }
+            return sumOfOnDemandDays;
+        }
+        public int CountSumOfPastYearLeaveDays(int employeeId, int year) 
+        {
+            int sumOfPreviousYearLeaveDays = 0;
+            foreach (var leave in Leaves)
+            {
+                if (leave.EmployeeId == employeeId && leave.DateFrom.Year == year)
+                {
+                    sumOfPreviousYearLeaveDays += StaticMethods.CountLeaveLength(leave);
+                }
+            }
+            return sumOfPreviousYearLeaveDays;
         }
     }
 }

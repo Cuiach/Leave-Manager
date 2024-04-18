@@ -1,89 +1,87 @@
 ﻿using Inewi_Console.Entities;
+using Inewi_Console.Presentation;
 
-Console.WriteLine("--- Leaves of employees management app ---");
+Console.WriteLine("--- Employees' leaves management app ---");
 
-Console.WriteLine("1 Add employee");
-Console.WriteLine("2 Display all employees");
-Console.WriteLine("3 Search employee");
-Console.WriteLine("4 Remove employee");
-Console.WriteLine("5 Add employee's leave");
-Console.WriteLine("6 Display all leaves");
-Console.WriteLine("7 Remove leave");
-Console.WriteLine("8 Edit leave");
-Console.WriteLine("9 Edit employee's settings");
-Console.WriteLine(" To exit insert 'x'");
+StaticMethods.ShowMenu();
 
 var userInput = Console.ReadLine();
 
-var listOfEmployees = new ListOfEmployees();
-var allLeavesInStorage = new HistoryOfLeaves();
+Application application = new();
 
 while (true)
 {
     switch (userInput)
     {
+        case "M":
+        case "m":
+            StaticMethods.ShowMenu();
+            break;
         case "1":
-            listOfEmployees.AddEmployee();
+            application.AddEmployee();
             break;
         case "2":
-            listOfEmployees.DisplayAllEmployees();
+            application.DisplayAllEmployees();
             break;
         case "3":
             Console.WriteLine("Insert search phrase");
             var searchPhrase = (Console.ReadLine() ?? ""); //null checker
-            listOfEmployees.DisplayMatchingEmployees(searchPhrase);
+            application.DisplayMatchingEmployees(searchPhrase);
             break;
         case "4":
-            Console.WriteLine("Insert id");
-            var idToRemove = (Console.ReadLine() ?? "0");
-            int intToRemove;
-            bool _ = int.TryParse(idToRemove, out intToRemove);
+            int intToRemove = StaticMethods.GetId();
             if (intToRemove != 0)
             {
-                listOfEmployees.RemoveEmployee(intToRemove);
+                application.RemoveEmployee(intToRemove);
             }
             break;
         case "5":
-            Console.WriteLine("Insert employee's id");
-            var employeeIdAsString = (Console.ReadLine() ?? "0");
-            int employeeId;
-            bool __ = int.TryParse(employeeIdAsString, out employeeId);
+            int employeeId = StaticMethods.GetId();
             if (employeeId != 0)
             {
-                allLeavesInStorage.AddLeave(employeeId);
+                application.AddLeave(employeeId);
             }
             break;
         case "6":
-            allLeavesInStorage.DisplayAllLeaves();
+            application.DisplayAllLeaves();
+            break;
+        case "6D":
+            application.DisplayAllLeavesOnDemand();
+            break;
+        case "6E":
+            employeeId = StaticMethods.GetId();
+            if (employeeId != 0)
+            {
+                application.DisplayAllLeavesForEmployee(employeeId);
+            }
+            break;
+        case "6ED":
+        case "6DE":
+            employeeId = StaticMethods.GetId();
+            if (employeeId != 0)
+            {
+                application.DisplayAllLeavesForEmployeeOnDemand(employeeId);
+            }
             break;
         case "7":
-            Console.WriteLine("Insert id");
-            var idOfLeaveToRemove = (Console.ReadLine() ?? "0");
-            int intOfLeaveToRemove;
-            bool ___ = int.TryParse(idOfLeaveToRemove, out intOfLeaveToRemove);
+            int intOfLeaveToRemove = StaticMethods.GetId();
             if (intOfLeaveToRemove != 0)
             {
-                allLeavesInStorage.RemoveLeave(intOfLeaveToRemove);
+                application.RemoveLeave(intOfLeaveToRemove);
             }
             break;
         case "8":
-            Console.WriteLine("Insert id");
-            var idOfLeaveToEdit = (Console.ReadLine() ?? "0");
-            int intOfLeaveToEdit;
-            bool ____ = int.TryParse(idOfLeaveToEdit, out intOfLeaveToEdit);
+            int intOfLeaveToEdit = StaticMethods.GetId();
             if (intOfLeaveToEdit != 0)
             {
-                allLeavesInStorage.EditLeave(intOfLeaveToEdit);
+                application.EditLeave(intOfLeaveToEdit);
             }
             break;
         case "9":
-            Console.WriteLine("Insert id");
-            var idOfEmployeeToEdit = (Console.ReadLine() ?? "0");
-            int intOfEmployeeToEdit;
-            bool _____ = int.TryParse(idOfEmployeeToEdit, out intOfEmployeeToEdit);
+            int intOfEmployeeToEdit = StaticMethods.GetId();
             if (intOfEmployeeToEdit != 0)
             {
-                listOfEmployees.EditSettings(intOfEmployeeToEdit);
+                application.EditSettings(intOfEmployeeToEdit);
             }
             break;
         case "x":
