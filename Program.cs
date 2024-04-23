@@ -3,7 +3,7 @@ using Inewi_Console.Presentation;
 
 Console.WriteLine("--- Employees' leaves management app ---");
 
-StaticMethods.ShowMenu();
+Menus.ShowMainMenu();
 
 var userInput = Console.ReadLine();
 
@@ -15,7 +15,7 @@ while (true)
     {
         case "M":
         case "m":
-            StaticMethods.ShowMenu();
+            Menus.ShowMainMenu();
             break;
         case "1":
             application.AddEmployee();
@@ -29,14 +29,14 @@ while (true)
             application.DisplayMatchingEmployees(searchPhrase);
             break;
         case "4":
-            int intToRemove = StaticMethods.GetId();
+            int intToRemove = AuxiliaryMethods.GetId();
             if (intToRemove != 0)
             {
                 application.RemoveEmployee(intToRemove);
             }
             break;
         case "5":
-            int employeeId = StaticMethods.GetId();
+            int employeeId = AuxiliaryMethods.GetId();
             if (employeeId != 0)
             {
                 application.AddLeave(employeeId);
@@ -49,7 +49,7 @@ while (true)
             application.DisplayAllLeavesOnDemand();
             break;
         case "6E":
-            employeeId = StaticMethods.GetId();
+            employeeId = AuxiliaryMethods.GetId();
             if (employeeId != 0)
             {
                 application.DisplayAllLeavesForEmployee(employeeId);
@@ -57,28 +57,28 @@ while (true)
             break;
         case "6ED":
         case "6DE":
-            employeeId = StaticMethods.GetId();
+            employeeId = AuxiliaryMethods.GetId();
             if (employeeId != 0)
             {
                 application.DisplayAllLeavesForEmployeeOnDemand(employeeId);
             }
             break;
         case "7":
-            int intOfLeaveToRemove = StaticMethods.GetId();
+            int intOfLeaveToRemove = AuxiliaryMethods.GetId();
             if (intOfLeaveToRemove != 0)
             {
                 application.RemoveLeave(intOfLeaveToRemove);
             }
             break;
         case "8":
-            int intOfLeaveToEdit = StaticMethods.GetId();
+            int intOfLeaveToEdit = AuxiliaryMethods.GetId();
             if (intOfLeaveToEdit != 0)
             {
                 application.EditLeave(intOfLeaveToEdit);
             }
             break;
         case "9":
-            int intOfEmployeeToEdit = StaticMethods.GetId();
+            int intOfEmployeeToEdit = AuxiliaryMethods.GetId();
             if (intOfEmployeeToEdit != 0)
             {
                 application.EditSettings(intOfEmployeeToEdit);

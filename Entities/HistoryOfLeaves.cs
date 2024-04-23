@@ -7,17 +7,11 @@ namespace Inewi_Console.Entities
     public class HistoryOfLeaves
     {
         public List<Leave> Leaves { get; set; } = [];
-        private static void DisplayLeaveDetails(Leave leave)
-        {
-            string onDemand = "ON DEMAND";
-            string notOnDemand = "NOT On Demand";
-            Console.WriteLine($"Leave details Id={leave.Id}, Employee Id={leave.EmployeeId}, leave from: {leave.DateFrom}, leave to: {leave.DateTo}, {(leave.IsOnDemand ? onDemand : notOnDemand)}");
-        }
         private static void DisplayLeaves(List<Leave> SetOfLeaves)
         {
             foreach (var leave in SetOfLeaves)
             {
-                DisplayLeaveDetails(leave);
+                Leave.DisplayLeaveDetails(leave);
             }
         }
         public bool CheckOverlapping(Leave leave)
@@ -32,7 +26,7 @@ namespace Inewi_Console.Entities
                 Console.Write("Overlapping: ");
                 foreach (Leave l in leavesOverlapping)
                 {
-                    DisplayLeaveDetails(l);
+                    Leave.DisplayLeaveDetails(l);
                 }
                 return false;
             }
@@ -98,7 +92,7 @@ namespace Inewi_Console.Entities
             {
                 if (leave.EmployeeId == employeeId && leave.DateFrom.Year == year)
                 {
-                    sumOfLeaveDays += StaticMethods.CountLeaveLength(leave);
+                    sumOfLeaveDays += Leave.CountLeaveLength(leave);
                 }
             }
             return sumOfLeaveDays;
@@ -110,7 +104,7 @@ namespace Inewi_Console.Entities
             {
                 if (leave.EmployeeId == employeeId && leave.DateFrom.Year == DateTime.Now.Year && leave.IsOnDemand == true)
                 {
-                    sumOfOnDemandDays += StaticMethods.CountLeaveLength(leave);
+                    sumOfOnDemandDays += Leave.CountLeaveLength(leave);
                 }
             }
             return sumOfOnDemandDays;
@@ -122,7 +116,7 @@ namespace Inewi_Console.Entities
             {
                 if (leave.EmployeeId == employeeId && leave.DateFrom.Year == year)
                 {
-                    sumOfPreviousYearLeaveDays += StaticMethods.CountLeaveLength(leave);
+                    sumOfPreviousYearLeaveDays += Leave.CountLeaveLength(leave);
                 }
             }
             return sumOfPreviousYearLeaveDays;

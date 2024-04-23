@@ -10,7 +10,7 @@
         public List<Employee> Employees { get; set; } = [];
         private HistoryOfLeaves allLeavesInStorage;
 //employee-related methods
-        private bool IsEmployeeExists(int employeeId)
+        private bool EmployeeExists(int employeeId)
         {
             Employee employee = Employees.FirstOrDefault(e => e.Id == employeeId);
             if (employee == null)
@@ -48,17 +48,9 @@
         {
             foreach (var employee in employees)
             {
-                int CalculateLeaveDaysTakenThisYear()
-                {
-                    return allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, DateTime.Now.Year);
-                }
-
-                int CalculateOnDemandTaken()
-                {
-                    return allLeavesInStorage.GetSumOnDemand(employee.Id);
-                }
-
-                DisplayEmployeeDetails(employee, CalculateLeaveDaysTakenThisYear(), CalculateOnDemandTaken());
+                var leaveDaysTakenThisYear = allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, DateTime.Now.Year);
+                var onDemandTaken = allLeavesInStorage.GetSumOnDemand(employee.Id);
+                DisplayEmployeeDetails(employee, leaveDaysTakenThisYear, onDemandTaken);
             }
         }
         private static void AdjustDateOfRecruitmentAndThusLeaveLimits(Employee employee, string newDateOfRecruitmentFromUser)
@@ -67,11 +59,11 @@
             DateTime newDateOfRecruitment = DateTime.ParseExact(newDateOfRecruitmentFromUser, "yyyy-MM-dd", null);
             employee.DayOfJoining = newDateOfRecruitment;
             Console.WriteLine($"Date of recruitment is set to: {newDateOfRecruitmentFromUser}");
-                        for (int i = oldYearOfRecruitment; i<newDateOfRecruitment.Year; i++)
-                        {
-                            LeaveLimit limitToRemove = employee.LeaveLimits.FirstOrDefault(l => l.Year == i);
-                            employee.LeaveLimits.Remove(limitToRemove);
-                        }
+                for (int i = oldYearOfRecruitment; i<newDateOfRecruitment.Year; i++)
+                {
+                    LeaveLimit limitToRemove = employee.LeaveLimits.FirstOrDefault(l => l.Year == i);
+                    employee.LeaveLimits.Remove(limitToRemove);
+                }
         }
         private static void SeeAndChangeLeaveLimits(Employee employee)
         {
@@ -89,12 +81,12 @@
 
                 Console.WriteLine($"Year: {i}, limit: {leaveLimit.Limit}");
                 Console.WriteLine("Do you want to change the limit? Press y if yes");
-                choice = StaticMethods.GetChoice();
+                choice = Console.ReadLine();
 
                 if (choice == "y")
                 {
                     Console.WriteLine("Put limit:");
-                    string? newLimit = StaticMethods.GetChoice();
+                    string? newLimit = Console.ReadLine();
                     try
                     {
                         int number = int.Parse(newLimit);
@@ -138,12 +130,12 @@
             }
 
             Console.WriteLine($"Accrued leave cap: {yearsWhenLeaveIsValid}. Do you want to change it? (press y if yes)");
-            choice = StaticMethods.GetChoice();
-            
+            choice = Console.ReadLine();
+
             if (choice == "y")
             {
                 Console.WriteLine("Choose accrued leave cap: \n0 = only current year \n1 = current year and last year \n2 = current and two last years \n3 = no cap");
-                string? newLeaveYearsLimit = StaticMethods.GetChoice();
+                string? newLeaveYearsLimit = Console.ReadLine();
                 try
                 {
                     int number = int.Parse(newLeaveYearsLimit);
@@ -189,26 +181,26 @@
             
             if (firstName != null && lastName != null)
             {
-                int idNewEmployee = Employees.Count == 0 ? 1 : Employees.LastOrDefault().Id + 1;
+                int newEmployeeId = Employees.Count == 0 ? 1 : Employees.LastOrDefault().Id + 1;
 
-                var newContact = new Employee(firstName, lastName, idNewEmployee);
+                var newEmployee = new Employee(firstName, lastName, newEmployeeId);
 
                 Console.WriteLine("On Demand for the employee per year - is it 4? If yes press enter; if not put correct number and enter");
-                var onDemandPerYear = StaticMethods.GetChoice();
-                newContact.OnDemandPerYear = onDemandPerYear == "" ? 4 : StaticMethods.StringToIntExceptZero(onDemandPerYear);
+                var onDemandPerYear = Console.ReadLine();
+                newEmployee.OnDemandPerYear = onDemandPerYear == "" ? 4 : AuxiliaryMethods.ToInt(onDemandPerYear);
 
                 Console.WriteLine("Leave days per year for the employee - is it 26? If yes press enter; if not put correct number and enter");
-                var leavesPerYearString = StaticMethods.GetChoice();
+                var leavesPerYearString = Console.ReadLine();
                 int leavesPerYear;
-                _ = leavesPerYearString == "" ? leavesPerYear = 26 : leavesPerYear = StaticMethods.StringToIntExceptZero(leavesPerYearString);
-                newContact.LeavesPerYear = leavesPerYearString == "" ? 26 : leavesPerYear;
+                _ = leavesPerYearString == "" ? leavesPerYear = 26 : leavesPerYear = AuxiliaryMethods.ToInt(leavesPerYearString);
+                newEmployee.LeavesPerYear = leavesPerYearString == "" ? 26 : leavesPerYear;
 
-                int currentYear = StaticMethods.StringToIntExceptZero(DateTime.Now.Year.ToString());
+                int currentYear = DateTime.Now.Year;
                 LeaveLimit leavelimit = new(currentYear, leavesPerYear);
-                newContact.LeaveLimits.Add(leavelimit);
-                newContact.DayOfJoining = DateTime.Now;
+                newEmployee.LeaveLimits.Add(leavelimit);
+                newEmployee.DayOfJoining = DateTime.Today;
 
-                Employees.Add(newContact);
+                Employees.Add(newEmployee);
                 Console.WriteLine("Day of joing of employee is set to today. If you want to change it go to edit settings");
             }
         }
@@ -218,27 +210,23 @@
         }
         public void RemoveEmployee(int employeeId)
         {
-            if (!IsEmployeeExists(employeeId))
+            if (!EmployeeExists(employeeId))
             {
                 return;
             }
             else
             {
-                var employeeToRemove = Employees.FirstOrDefault(c => c.Id == employeeId);
+                var employeeToRemove = Employees.First(c => c.Id == employeeId);
                 Employees.Remove(employeeToRemove);
             }
         }
         public void DisplayMatchingEmployees(string searchPhrase)
         {
-            var matchingEmployees = new List<Employee>();
+            var matchingEmployees = Employees
+                .Where(e => e.FirstName == searchPhrase || e.LastName == searchPhrase)
+                .ToList();
 
-            foreach (var employee in Employees)
-            {
-                if (employee.FirstName == searchPhrase || employee.LastName == searchPhrase)
-                    matchingEmployees.Add(employee);
-            }
-
-            if (matchingEmployees != null && matchingEmployees.Count != 0)
+            if (matchingEmployees.Any())
             {
                 DisplayAllEmployeesDetails(matchingEmployees);
             }
@@ -249,7 +237,7 @@
         }
         public void EditSettings(int employeeIdToEdit)
         {
-            if (!IsEmployeeExists(employeeIdToEdit))
+            if (!EmployeeExists(employeeIdToEdit))
             {
                 return;
             };
@@ -259,12 +247,12 @@
             int oldYearOfRecruitment = employee.DayOfJoining.Year;
 
             Console.WriteLine($"On Demand for the employee per year - is it {employee.OnDemandPerYear}? If yes press enter; if not put correct number and enter");
-            var onDemandPerYear = StaticMethods.GetChoice();
-            employee.OnDemandPerYear = onDemandPerYear == "" ? employee.OnDemandPerYear : StaticMethods.StringToIntExceptZero(onDemandPerYear);
+            var onDemandPerYear = Console.ReadLine();
+            employee.OnDemandPerYear = onDemandPerYear == "" ? employee.OnDemandPerYear : AuxiliaryMethods.ToInt(onDemandPerYear);
 
             Console.WriteLine($"Leave days per year for the employee - is it {employee.LeavesPerYear}? If yes press enter; if not put correct number and enter");
-            var leavesPerYear = StaticMethods.GetChoice();
-            employee.LeavesPerYear = leavesPerYear == "" ? employee.LeavesPerYear : StaticMethods.StringToIntExceptZero(leavesPerYear);
+            var leavesPerYear = Console.ReadLine();
+            employee.LeavesPerYear = leavesPerYear == "" ? employee.LeavesPerYear : AuxiliaryMethods.ToInt(leavesPerYear);
             LeaveLimit leaveLimitThisYear = employee.LeaveLimits.FirstOrDefault(l => l.Year == DateTime.Now.Year);
             if (leaveLimitThisYear == null)
             {
@@ -273,19 +261,19 @@
             }
             else
             {
-                leaveLimitThisYear.Limit = StaticMethods.StringToIntExceptZero(leavesPerYear);
+                leaveLimitThisYear.Limit = AuxiliaryMethods.ToInt(leavesPerYear);
             }
 
             Console.WriteLine("Do you want to change employee's date of recruitment? Press y if yes");
-            choice = StaticMethods.GetChoice();
+            choice = Console.ReadLine();
             if (choice == "y")
             {
                 DateTime newDateOfRecruitment;
                 string dateFromUser = "";
-                while (!StaticMethods.IsValidDate(dateFromUser))
+                while (!AuxiliaryMethods.IsValidDate(dateFromUser))
                 {
                     Console.WriteLine("Enter a date of recruitment (yyyy-MM-dd): ");
-                    dateFromUser = StaticMethods.GetChoice();
+                    dateFromUser = Console.ReadLine();
                 }
                 newDateOfRecruitment = DateTime.ParseExact(dateFromUser, "yyyy-MM-dd", null);
 
@@ -455,7 +443,7 @@
         }
         public void AddLeave(int employeeId)
         {
-            if(!IsEmployeeExists(employeeId))
+            if(!EmployeeExists(employeeId))
             {
                 return;
             };
@@ -512,7 +500,7 @@
             }
 
             int ableOnDemand = 0;
-            _ = IsOnDemandLimitSatisfied(employee, StaticMethods.CountLeaveLength(leave)) ? ableOnDemand = 1 : 0;
+            _ = IsOnDemandLimitSatisfied(employee, Leave.CountLeaveLength(leave)) ? ableOnDemand = 1 : 0;
 
             allLeavesInStorage.AddLeave(leave, ableOnDemand);
             ShowLeaveAvailableForAllPastYears(employee); //TEST PURPOSE
@@ -595,7 +583,7 @@
 
                 allLeavesInStorage.RemoveLeave(intOfLeaveToEdit);
                 int ableOnDemand = 0;
-                _ = IsOnDemandLimitSatisfied(employee, StaticMethods.CountLeaveLength(leaveAuxiliary)) ? ableOnDemand = 1 : 0;
+                _ = IsOnDemandLimitSatisfied(employee, Leave.CountLeaveLength(leaveAuxiliary)) ? ableOnDemand = 1 : 0;
 
                 if (leaveToEdit.IsOnDemand && ableOnDemand == 0)
                 {
