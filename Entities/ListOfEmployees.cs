@@ -255,52 +255,10 @@
                 return true;
             }
         }
-        private void ShowLeaveAvailableForAllPastYears(Employee employee) //rather for test purpose
-        {
-            int startingYear = employee.DayOfJoining.Year;
-
-            for (int i = startingYear; i <= DateTime.Now.Year; i++)
-            {
-                int k = CountLeaveAvailable(employee, i);
-                Console.WriteLine($" Accrued leave available in {i}: {k}");
-            }
-        }
-        private int CountLeaveAvailable(Employee employee, int year)
-        {
-            int result = 0;
-            LeaveLimit leaveLimit = employee.LeaveLimits.First(l => l.Year == year);
-            result = leaveLimit.Limit - allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, year);
-            Console.Write($"In {year} year there was {leaveLimit.Limit} limit and {allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, year)} taken.");
-            if (employee.DayOfJoining.Year < year)
-            {
-                result += CountExcessLeaveFromPast(employee, year - 1);
-            }
-            return result;
-        }
-        private int CountExcessLeaveFromPast(Employee employee, int year)
-        {
-            int countedExcess = 0;
-            switch (employee.HowManyYearsToTakePastLeave)
-            {
-                case Employee.YearsToTakeLeave.CurrentOnly:
-                    countedExcess += ExcessLeaveFromPastYearCurrentOnly(employee, year);
-                    break;
-                case Employee.YearsToTakeLeave.OneMore:
-                    countedExcess += ExcessLeaveFromPastYearOneMore(employee, year);
-                    break;
-                case Employee.YearsToTakeLeave.TwoMore:
-                    countedExcess += ExcessLeaveFromPastYearTwoMore(employee, year);
-                    break;
-                case Employee.YearsToTakeLeave.NoLimit:
-                    countedExcess += ExcessLeaveFromPastYearNoLimit(employee, year);
-                    break;
-            }
-            return countedExcess;
-        }
         private int ExcessLeaveFromPastYearCurrentOnly(Employee employee, int k)
         {
             return 0;
-        }
+        } //name may be misleading... "CurrentOnly" refers to for how many years not-taken past leave may be taken. In this method - only in current year.
         private int ExcessLeaveFromPastYearOneMore(Employee employee, int k)
         {
             LeaveLimit leaveLimitInYearK = employee.LeaveLimits.First(l => l.Year == k);
@@ -347,6 +305,48 @@
             else
             {
                 return leaveLimitInYearK.Limit - sumOfLeavesInYearK;
+            }
+        }
+        private int CountExcessLeaveFromPast(Employee employee, int year)
+        {
+            int countedExcess = 0;
+            switch (employee.HowManyYearsToTakePastLeave)
+            {
+                case Employee.YearsToTakeLeave.CurrentOnly:
+                    countedExcess += ExcessLeaveFromPastYearCurrentOnly(employee, year);
+                    break;
+                case Employee.YearsToTakeLeave.OneMore:
+                    countedExcess += ExcessLeaveFromPastYearOneMore(employee, year);
+                    break;
+                case Employee.YearsToTakeLeave.TwoMore:
+                    countedExcess += ExcessLeaveFromPastYearTwoMore(employee, year);
+                    break;
+                case Employee.YearsToTakeLeave.NoLimit:
+                    countedExcess += ExcessLeaveFromPastYearNoLimit(employee, year);
+                    break;
+            }
+            return countedExcess;
+        }
+        private int CountLeaveAvailable(Employee employee, int year)
+        {
+            int result = 0;
+            LeaveLimit leaveLimit = employee.LeaveLimits.First(l => l.Year == year);
+            result = leaveLimit.Limit - allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, year);
+            Console.Write($"In {year} year there was {leaveLimit.Limit} limit and {allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, year)} taken.");
+            if (employee.DayOfJoining.Year < year)
+            {
+                result += CountExcessLeaveFromPast(employee, year - 1);
+            }
+            return result;
+        }
+        private void ShowLeaveAvailableForAllPastYears(Employee employee) //rather for test purpose
+        {
+            int startingYear = employee.DayOfJoining.Year;
+
+            for (int i = startingYear; i <= DateTime.Now.Year; i++)
+            {
+                int k = CountLeaveAvailable(employee, i);
+                Console.WriteLine($" Accrued leave available in {i}: {k}");
             }
         }
         public void AddLeave(int employeeId)
