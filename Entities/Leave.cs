@@ -15,9 +15,21 @@ namespace Inewi_Console.Entities
             string notOnDemand = "NOT On Demand";
             Console.WriteLine($"Leave details Id={leave.Id}, Employee Id={leave.EmployeeId}, leave from: {leave.DateFrom}, leave to: {leave.DateTo}, {(leave.IsOnDemand ? onDemand : notOnDemand)}");
         }
-        public static int CountLeaveLength(Leave leave)
+        internal static int CountLeaveLength(Leave leave)
         {
             return (leave.DateTo - leave.DateFrom).Days + 1;
+        }
+        internal static bool IsLeaveInOneYear(Leave leave)
+        {
+            if (leave.DateFrom.Year != leave.DateTo.Year)
+            {
+                Console.WriteLine("Leave must be within one calendar year. Try again with correct dates.");
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }

@@ -9,7 +9,7 @@
         }
         public List<Employee> Employees { get; set; } = [];
         private HistoryOfLeaves allLeavesInStorage;
-//employee-related methods
+        //employee-related methods
         private bool EmployeeExists(int employeeId)
         {
             Employee employee = Employees.FirstOrDefault(e => e.Id == employeeId);
@@ -17,6 +17,38 @@
             {
                 Console.WriteLine("There is no employee with this Id.");
                 return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        private void PropagateLeaveLimitsForCurrentYearForAllEmployees()
+        {
+            foreach (var employee in Employees)
+            {
+                LeaveLimit leaveLimit = employee.LeaveLimits.FirstOrDefault(l => l.Year == DateTime.Now.Year);
+                if (leaveLimit == null)
+                {
+                    LeaveLimit newLeaveLimit = new(DateTime.Now.Year, employee.LeavesPerYear);
+                    employee.LeaveLimits.Add(newLeaveLimit);
+                }
+            }
+        }
+        private bool CheckIfLeaveLimitExistsForCurrentYear(Employee employee)
+        {
+            if(!Employee.LeaveLimitForCurrentYearExists(employee))
+            {
+                Console.WriteLine("It looks there is one or more employees who do not have leave limit set for this year. Do you want to fill leave limits in all missing places? Put y if yes");
+                if(Console.ReadLine() == "y")
+                {
+                    PropagateLeaveLimitsForCurrentYearForAllEmployees();
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
@@ -48,127 +80,15 @@
         {
             foreach (var employee in employees)
             {
-                var leaveDaysTakenThisYear = allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, DateTime.Now.Year);
-                var onDemandTaken = allLeavesInStorage.GetSumOnDemand(employee.Id);
-                DisplayEmployeeDetails(employee, leaveDaysTakenThisYear, onDemandTaken);
-            }
-        }
-        private static void AdjustDateOfRecruitmentAndThusLeaveLimits(Employee employee, string newDateOfRecruitmentFromUser)
-        {
-            int oldYearOfRecruitment = employee.DayOfJoining.Year;
-            DateTime newDateOfRecruitment = DateTime.ParseExact(newDateOfRecruitmentFromUser, "yyyy-MM-dd", null);
-            employee.DayOfJoining = newDateOfRecruitment;
-            Console.WriteLine($"Date of recruitment is set to: {newDateOfRecruitmentFromUser}");
-                for (int i = oldYearOfRecruitment; i<newDateOfRecruitment.Year; i++)
+                if (CheckIfLeaveLimitExistsForCurrentYear(employee))
                 {
-                    LeaveLimit limitToRemove = employee.LeaveLimits.FirstOrDefault(l => l.Year == i);
-                    employee.LeaveLimits.Remove(limitToRemove);
+                    var leaveDaysTakenThisYear = allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, DateTime.Now.Year);
+                    var onDemandTaken = allLeavesInStorage.GetSumOnDemand(employee.Id);
+                    DisplayEmployeeDetails(employee, leaveDaysTakenThisYear, onDemandTaken);
                 }
-        }
-        private static void SeeAndChangeLeaveLimits(Employee employee)
-        {
-            var choice = "";
-            Console.WriteLine("See and change leave limits for employee for given year");
-            
-            for (int i = employee.DayOfJoining.Year; i < DateTime.Now.Year; i++)
-            {
-                LeaveLimit leaveLimit = employee.LeaveLimits.FirstOrDefault(l => l.Year == i);
-                if (leaveLimit == null)
+                else
                 {
-                    leaveLimit = new(i, employee.LeavesPerYear);
-                    employee.LeaveLimits.Add(leaveLimit);
-                }
-
-                Console.WriteLine($"Year: {i}, limit: {leaveLimit.Limit}");
-                Console.WriteLine("Do you want to change the limit? Press y if yes");
-                choice = Console.ReadLine();
-
-                if (choice == "y")
-                {
-                    Console.WriteLine("Put limit:");
-                    string? newLimit = Console.ReadLine();
-                    try
-                    {
-                        int number = int.Parse(newLimit);
-                        leaveLimit.Limit = number;
-                        Console.WriteLine($"Year: {i}, limit is set to: {number}");
-                    }
-                    catch (FormatException)
-                    {
-                        Console.WriteLine("Input is not in correct format.");
-                    }
-                    catch (OverflowException)
-                    {
-                        Console.WriteLine("Input is too large or too small.");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"An error occurred: {ex.Message}");
-                    }
-                }
-            }
-        }
-        private static void ChangeAccruedLeaveLimitPolicy(Employee employee)
-        {
-            var choice = "";
-            string yearsWhenLeaveIsValid = "";
-            
-            switch (employee.HowManyYearsToTakePastLeave)
-            {
-                case Employee.YearsToTakeLeave.CurrentOnly:
-                    yearsWhenLeaveIsValid = "only current year";
-                    break;
-                case Employee.YearsToTakeLeave.OneMore:
-                    yearsWhenLeaveIsValid = "1 additional past year";
-                    break;
-                case Employee.YearsToTakeLeave.TwoMore:
-                    yearsWhenLeaveIsValid = "2 additional past years";
-                    break;
-                case Employee.YearsToTakeLeave.NoLimit:
-                    yearsWhenLeaveIsValid = "no cap";
-                    break;
-            }
-
-            Console.WriteLine($"Accrued leave cap: {yearsWhenLeaveIsValid}. Do you want to change it? (press y if yes)");
-            choice = Console.ReadLine();
-
-            if (choice == "y")
-            {
-                Console.WriteLine("Choose accrued leave cap: \n0 = only current year \n1 = current year and last year \n2 = current and two last years \n3 = no cap");
-                string? newLeaveYearsLimit = Console.ReadLine();
-                try
-                {
-                    int number = int.Parse(newLeaveYearsLimit);
-                    switch (newLeaveYearsLimit)
-                    {
-                        case "0":
-                            employee.HowManyYearsToTakePastLeave = Employee.YearsToTakeLeave.CurrentOnly;
-                            break;
-                        case "1":
-                            employee.HowManyYearsToTakePastLeave = Employee.YearsToTakeLeave.OneMore;
-                            break;
-                        case "2":
-                            employee.HowManyYearsToTakePastLeave = Employee.YearsToTakeLeave.TwoMore;
-                            break;
-                        case "3":
-                            employee.HowManyYearsToTakePastLeave = Employee.YearsToTakeLeave.NoLimit;
-                            break;
-                        default:
-                            Console.WriteLine("Something went wrong - nothing set anew");
-                            break;
-                    }
-                }
-                catch (FormatException)
-                {
-                    Console.WriteLine("Input is not in correct format.");
-                }
-                catch (OverflowException)
-                {
-                    Console.WriteLine("Input is too large or too small.");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    Console.WriteLine("Leave limit for employee is not set for current year. Thus it is not possible to show details.");
                 }
             }
         }
@@ -286,18 +206,18 @@
                     }
                     else
                     {
-                        AdjustDateOfRecruitmentAndThusLeaveLimits(employee, dateFromUser);
+                        Employee.AdjustDateOfRecruitmentAndThusLeaveLimits(employee, dateFromUser);
                     }
                 }
                 else
                 {
-                    AdjustDateOfRecruitmentAndThusLeaveLimits(employee, dateFromUser);
+                    Employee.AdjustDateOfRecruitmentAndThusLeaveLimits(employee, dateFromUser);
                 }
             }
 
-            SeeAndChangeLeaveLimits(employee);
+            Employee.SeeAndChangeLeaveLimits(employee);
 
-            ChangeAccruedLeaveLimitPolicy(employee);
+            Employee.ChangeAccruedLeaveLimitPolicy(employee);
         }
 //leave-related methods
         private bool IsLeaveLimitPolicySatisfied(Employee employee)
@@ -328,18 +248,6 @@
             if (leave.DateFrom < employee.DayOfJoining)
             {
                 Console.WriteLine("Leave end cannot be older than the day of recruitment. Try again with correct dates.");
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-        private static bool IsLeaveInOneYear(Leave leave)
-        {
-            if (leave.DateFrom.Year != leave.DateTo.Year)
-            {
-                Console.WriteLine("Leave must be within one calendar year. Try again with correct dates.");
                 return false;
             }
             else
@@ -482,7 +390,7 @@
                         return;
                     }
 
-                    if (!IsLeaveInOneYear(leave))
+                    if (!Leave.IsLeaveInOneYear(leave))
                     {
                         return;
                     }
@@ -494,7 +402,7 @@
                 }
             }
 
-            if(!IsLeaveAfterDateOfRecruitment(employee, leave) || !IsLeaveInOneYear(leave))
+            if(!IsLeaveAfterDateOfRecruitment(employee, leave) || !Leave.IsLeaveInOneYear(leave))
             {
                 return;
             }
@@ -576,7 +484,7 @@
                     Console.WriteLine("Date 'to' is not changed.");
                 }
                 
-                if (!IsLeaveInOneYear(leaveAuxiliary))
+                if (!Leave.IsLeaveInOneYear(leaveAuxiliary))
                 {
                     return;
                 }
