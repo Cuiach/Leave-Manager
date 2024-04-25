@@ -10,7 +10,7 @@
         public List<Employee> Employees { get; set; } = [];
         private HistoryOfLeaves allLeavesInStorage;
 
-        //employee-related methods
+//employee-related methods
         private bool EmployeeExists(int employeeId)
         {
             Employee employee = Employees.FirstOrDefault(e => e.Id == employeeId);
@@ -98,7 +98,7 @@
             }
         }
 
-        internal void ChangeAccruedLeaveLimitPolicy(Employee employee)
+        private void ChangeAccruedLeaveLimitPolicy(Employee employee)
         {
             var choice = "";
             string yearsWhenLeaveIsValid = "";
@@ -203,7 +203,7 @@
             }
         }
 
-        internal void SeeAndChangeLeaveLimits(Employee employee)
+        private void SeeAndChangeLeaveLimits(Employee employee)
         {
             var choice = "";
             Employee employeeAuxiliary = new("employee", "auxiliary", 0);
@@ -287,8 +287,18 @@
             }
         }
 
+        private int SetNewLimit(string ? inputFromUser, int defaultNumber)
+        {
+            int newLimit;
+            newLimit = inputFromUser == "" ? defaultNumber : AuxiliaryMethods.ToInt(inputFromUser);
+            newLimit = newLimit < 0 ? defaultNumber : newLimit;
+            return newLimit;
+        }
+
         public void AddEmployee()
         {
+            int defaultOnDemand = 4;
+            int defaultLeavePerYear = 26;
             Console.WriteLine("Insert first name");
             var firstName = Console.ReadLine();
             Console.WriteLine("Insert last name");
@@ -300,23 +310,22 @@
 
                 var newEmployee = new Employee(firstName, lastName, newEmployeeId);
 
-                Console.WriteLine("On Demand for the employee per year - is it 4? If yes press enter; if not put correct number and enter");
-                var onDemandPerYear = Console.ReadLine();
-                newEmployee.OnDemandPerYear = onDemandPerYear == "" ? 4 : AuxiliaryMethods.ToInt(onDemandPerYear);
+                Console.WriteLine($"On Demand for the employee per year - is it {defaultOnDemand}? If yes press enter; if not put correct number and enter");
+                newEmployee.OnDemandPerYear = SetNewLimit(Console.ReadLine(), defaultOnDemand);
+                Console.WriteLine($"On demand leave was set to: {newEmployee.OnDemandPerYear}");
 
-                Console.WriteLine("Leave days per year for the employee - is it 26? If yes press enter; if not put correct number and enter");
-                var leavesPerYearString = Console.ReadLine();
-                int leavesPerYear;
-                _ = leavesPerYearString == "" ? leavesPerYear = 26 : leavesPerYear = AuxiliaryMethods.ToInt(leavesPerYearString);
-                newEmployee.LeavesPerYear = leavesPerYearString == "" ? 26 : leavesPerYear;
+                Console.WriteLine($"Leave days per year for the employee - is it {defaultLeavePerYear}? If yes press enter; if not put correct number and enter");
+                newEmployee.LeavesPerYear = SetNewLimit(Console.ReadLine(), defaultLeavePerYear);
+                Console.WriteLine($"Leave per year was set to: {newEmployee.LeavesPerYear}");
 
                 int currentYear = DateTime.Now.Year;
-                LeaveLimit leavelimit = new(currentYear, leavesPerYear);
+                LeaveLimit leavelimit = new(currentYear, newEmployee.LeavesPerYear);
                 newEmployee.LeaveLimits.Add(leavelimit);
                 newEmployee.DayOfJoining = DateTime.Today;
 
                 Employees.Add(newEmployee);
-                Console.WriteLine("Day of joing of employee is set to today. If you want to change it go to edit settings");
+                DisplayEmployeeDetails(newEmployee, 0, 0);
+                Console.WriteLine("Day of joining of employee is set to today. If you want to change it go to edit settings");
             }
         }
 
@@ -366,12 +375,27 @@
             int oldYearOfRecruitment = employee.DayOfJoining.Year;
 
             Console.WriteLine($"On Demand for the employee per year - is it {employee.OnDemandPerYear}? If yes press enter; if not put correct number and enter");
-            var onDemandPerYear = Console.ReadLine();
-            employee.OnDemandPerYear = onDemandPerYear == "" ? employee.OnDemandPerYear : AuxiliaryMethods.ToInt(onDemandPerYear);
+            employee.OnDemandPerYear = SetNewLimit(Console.ReadLine(), employee.OnDemandPerYear);
+            Console.WriteLine($"On demand leave was set to: {employee.OnDemandPerYear}");
 
             Console.WriteLine($"Leave days per year for the employee - is it {employee.LeavesPerYear}? If yes press enter; if not put correct number and enter");
-            var leavesPerYear = Console.ReadLine();
-            employee.LeavesPerYear = leavesPerYear == "" ? employee.LeavesPerYear : AuxiliaryMethods.ToInt(leavesPerYear);
+            Employee auxiliaryEmployee = new("aux", "emp", 0);
+            auxiliaryEmployee.LeavesPerYear = employee.LeavesPerYear;
+            employee.LeavesPerYear = SetNewLimit(Console.ReadLine(), employee.LeavesPerYear);
+            LeaveLimit leavelimit;
+            leavelimit = employee.LeaveLimits.FirstOrDefault(l => l.Year == DateTime.Today.Year);
+            leavelimit.Limit = employee.LeavesPerYear;
+            if (IsLeaveLimitPolicySatisfied(employee))
+            {
+                Console.WriteLine($"Leave limit was set to: {employee.LeavesPerYear}");
+            }
+            else
+            {
+                employee.LeavesPerYear = auxiliaryEmployee.LeavesPerYear;
+                leavelimit.Limit = employee.LeavesPerYear;
+                Console.WriteLine($"Leave limit cannot be changed and is: {employee.LeavesPerYear}. Check possible violation of leave limit policy.");
+            }
+
             LeaveLimit leaveLimitThisYear = employee.LeaveLimits.FirstOrDefault(l => l.Year == DateTime.Now.Year);
             if (leaveLimitThisYear == null)
             {
@@ -543,7 +567,7 @@
 
             if (whetherToDisplayLeaveDetails == 1)
             {
-                Console.Write($"In {year} year there was {leaveLimit.Limit} limit and {allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, year)} taken.");
+                Console.Write($"In {year} year: {leaveLimit.Limit} limit and {allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, year)} taken.");
             }
 
             if (employee.DayOfJoining.Year < year)

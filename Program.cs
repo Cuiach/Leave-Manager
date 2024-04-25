@@ -1,7 +1,7 @@
 ﻿using Inewi_Console.Entities;
 using Inewi_Console.Presentation;
 
-Console.WriteLine("--- Employees' leaves management app ---");
+Console.WriteLine("--- Leave management app ---");
 
 Menus.ShowMainMenu();
 
