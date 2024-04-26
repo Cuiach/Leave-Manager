@@ -59,13 +59,13 @@
 
         public void DisplayAllLeavesOnDemand()
         {
-            var onDemandLeaves = Leaves.Where(l => l.IsOnDemand);
+            var onDemandLeaves = Leaves.Where(l => l.IsOnDemand).ToList();
             DisplayLeaves((List<Leave>)onDemandLeaves);
         }
 
         public void DisplayAllLeavesForEmployee(int employeeId)
         {
-            var leavesOfEmployee = Leaves.Where(l => l.EmployeeId == employeeId);
+            var leavesOfEmployee = Leaves.Where(l => l.EmployeeId == employeeId).ToList();
             DisplayLeaves((List<Leave>)leavesOfEmployee);
         }
 
@@ -73,7 +73,7 @@
         {
             var leavesOfEmployeeOnDemand = Leaves.Where
                 (l => l.EmployeeId == employeeId).Where
-                (l => l.IsOnDemand);
+                (l => l.IsOnDemand).ToList();
             DisplayLeaves((List<Leave>)leavesOfEmployeeOnDemand);
         }
 

@@ -364,15 +364,24 @@
             int oldYearOfRecruitment = employee.DayOfJoining.Year;
 
             Console.WriteLine($"On Demand for the employee per year - is it {employee.OnDemandPerYear}? If yes press enter; if not put correct number and enter");
-            employee.OnDemandPerYear = AuxiliaryMethods.SetNewLimit(Console.ReadLine(), employee.OnDemandPerYear);
-            Console.WriteLine($"On demand leave was set to: {employee.OnDemandPerYear}");
-
-            LeaveLimit leaveLimitThisYear = employee.LeaveLimits.FirstOrDefault(l => l.Year == DateTime.Now.Year);
-            if (leaveLimitThisYear == null)
+            int newOnDemand = AuxiliaryMethods.SetNewLimit(Console.ReadLine(), employee.OnDemandPerYear);
+            if (allLeavesInStorage.GetSumOnDemand(employee.Id) > newOnDemand)
             {
-                leaveLimitThisYear = new(DateTime.Now.Year, employee.LeavesPerYear);
-                employee.LeaveLimits.Add(leaveLimitThisYear);
+                Console.WriteLine($"On demand leave limit: {employee.OnDemandPerYear} days and cannot be changed. Check already taken leaves on demand.");
             }
+            else
+            {
+                employee.OnDemandPerYear = newOnDemand;
+                Console.WriteLine($"On demand leave limit: {employee.OnDemandPerYear} days");
+            }
+
+            //LeaveLimit leaveLimitThisYear = employee.LeaveLimits.FirstOrDefault(l => l.Year == DateTime.Now.Year);
+            //if (leaveLimitThisYear == null)
+            //{
+            //    employee.PropagateLeaveLimitForCurrentYear(employee.LeavesPerYear, false);
+            //    //leaveLimitThisYear = new(DateTime.Now.Year, employee.LeavesPerYear);
+            //    //employee.LeaveLimits.Add(leaveLimitThisYear);
+            //}
 
             Console.WriteLine($"Leave days per year for the employee - is it {employee.LeavesPerYear}? If yes press enter; if not put correct number and enter");
             Employee auxiliaryEmployee = new("aux", "emp", 0);
@@ -380,7 +389,7 @@
             employee.PropagateLeaveLimitForCurrentYear(AuxiliaryMethods.SetNewLimit(Console.ReadLine(), employee.LeavesPerYear), false);
             if (IsLeaveLimitPolicySatisfied(employee))
             {
-                Console.WriteLine($"Leave limit was set to: {employee.LeavesPerYear}");
+                Console.WriteLine($"Leave limit: {employee.LeavesPerYear}");
             }
             else
             {

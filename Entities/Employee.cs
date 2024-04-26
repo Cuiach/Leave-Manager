@@ -52,7 +52,15 @@
             {
                 LeaveLimit leavelimit;
                 leavelimit = this.LeaveLimits.FirstOrDefault(l => l.Year == currentYear);
-                leavelimit.Limit = this.LeavesPerYear;
+                if (leavelimit != null)
+                {
+                    leavelimit.Limit = this.LeavesPerYear;
+                }
+                else
+                {
+                    leavelimit = new(currentYear, this.LeavesPerYear);
+                    this.LeaveLimits.Add(leavelimit);
+                }
             }
         }
     }
