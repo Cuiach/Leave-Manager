@@ -37,5 +37,13 @@ namespace Inewi_Console.Entities
                 return false;
             }
         }
+
+        public static int SetNewLimit(string? inputFromUser, int defaultNumber)
+        {
+            int newLimit;
+            newLimit = inputFromUser == "" ? defaultNumber : ToInt(inputFromUser);
+            newLimit = newLimit < 0 ? defaultNumber : newLimit;
+            return newLimit;
+        }
     }
 }

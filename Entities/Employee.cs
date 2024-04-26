@@ -36,5 +36,24 @@
         {
             return this.LeaveLimits.FirstOrDefault(l => l.Year == DateTime.Now.Year) != null;
         }
+
+        internal void PropagateLeaveLimitForCurrentYear(int leavesPerYear, bool isItNewEmployee)
+        {
+            int currentYear = DateTime.Today.Year;
+            this.LeavesPerYear = leavesPerYear;
+
+            if (isItNewEmployee)
+            {
+                LeaveLimit leavelimit = new(currentYear, this.LeavesPerYear);
+                this.LeaveLimits.Add(leavelimit);
+                Console.WriteLine($"Leave per year was set to: {this.LeavesPerYear}");
+            }
+            else
+            {
+                LeaveLimit leavelimit;
+                leavelimit = this.LeaveLimits.FirstOrDefault(l => l.Year == currentYear);
+                leavelimit.Limit = this.LeavesPerYear;
+            }
+        }
     }
 }
