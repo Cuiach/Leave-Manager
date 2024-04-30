@@ -32,7 +32,8 @@
         
         internal int GetLeaveLength()
         {
-            return (DateTo - DateFrom).Days + 1;
+            WorkDaysCalculator workDaysCalculator = new();
+            return workDaysCalculator.CountWorkDaysBetweenDates(DateFrom, DateTo);
         }
  
         internal bool IsLeaveInOneYear()

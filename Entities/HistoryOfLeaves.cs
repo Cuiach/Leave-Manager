@@ -6,9 +6,8 @@
 
         internal void SplitLeaveIntoConsecutiveBusinessDaysBits(Leave leave)
         {
-//            List<Leave> leaves = [];
-            int employeeeId = leave.EmployeeId;
             int leaveId = leave.Id;
+            int employeeeId = leave.EmployeeId;
             DateTime dateFrom = leave.DateFrom;
             DateTime dateTo = leave.DateTo;
             bool isOnDemand = leave.IsOnDemand;
@@ -27,43 +26,6 @@
                 Leaves.Add(leaveHere);
                 i++;
             }
-
-            //int i = 0;
-            //leaves[i] = new Leave(employeeeId, leaveId, false);
-            //Leave leaveHere = leaves[i];
-
-            //do
-            //{
-            //    DayCharacteristic dayCharacteristic = new(dateFrom);
-            //    if (!dayCharacteristic.isBusinessDay)
-            //    {
-            //        leaveHere = leaves[i++];
-            //    }
-            //    else
-            //    {
-            //        if (leaveHere.DateFrom == null)
-            //        {
-            //            leaveHere.DateFrom = dateFrom;
-            //        }
-            //        leaveHere.DateTo = dateFrom;
-            //    }
-
-            //    if (dateFrom == dateTo)
-            //    { }
-            //    else
-            //    {
-            //        dateFrom = dateFrom.Date.AddDays(+1);
-            //    }
-            //} while (dateFrom != dateTo);
-
-            //foreach (Leave leaveInSet in leaves)
-            //{
-            //    if (leaveInSet.DateFrom != null)
-            //    {
-            //        leaveInSet.IsOnDemand = isOnDemand;
-            //        Leaves.Add(leaveInSet);
-            //    }
-            //}
         }
 
         public bool CheckOverlapping(Leave leave)

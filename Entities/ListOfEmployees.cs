@@ -648,7 +648,7 @@
 
             if (!IsLeaveLimitPolicySatisfied(employee))
             {
-                int nowLastAddedLeaveId = allLeavesInStorage.Leaves.Count == 0 ? 0 : allLeavesInStorage.Leaves.LastOrDefault().Id;
+                int nowLastAddedLeaveId = allLeavesInStorage.Leaves.Count == 0 ? 0 : allLeavesInStorage.Leaves.Last().Id;
                 for (int i = leave.Id; i <= nowLastAddedLeaveId; i++)
                 {
                     RemoveLeave(i);
@@ -685,6 +685,7 @@
         public void EditLeave(int intOfLeaveToEdit)
         {
             var leaveToEdit = allLeavesInStorage.Leaves.FirstOrDefault(l => l.Id == intOfLeaveToEdit);
+            int leaveIdAfterEdit = allLeavesInStorage.Leaves.Last().Id + 1;
 
             if (leaveToEdit == null)
             {
@@ -693,7 +694,7 @@
             else
             {
                 Employee employee = Employees.First(e => e.Id == leaveToEdit.EmployeeId);
-                Leave leaveAuxiliary = new(leaveToEdit.EmployeeId, leaveToEdit.Id, true)
+                Leave leaveAuxiliary = new(leaveToEdit.EmployeeId, leaveIdAfterEdit, true)
                 {
                     DateFrom = leaveToEdit.DateFrom,
                     DateTo = leaveToEdit.DateTo,
@@ -743,11 +744,17 @@
                     {
                         leaveAuxiliary.IsOnDemand = false;
                         allLeavesInStorage.AddLeave(leaveAuxiliary, ableOnDemand);
+                        allLeavesInStorage.SplitLeaveIntoConsecutiveBusinessDaysBits(leaveAuxiliary);
                         ShowLeaveAvailableForAllPastYears(employee); //TEST PURPOSE
 
                         if (!IsLeaveLimitPolicySatisfied(employee))
                         {
-                            allLeavesInStorage.RemoveLeave(intOfLeaveToEdit);
+                            int lastLeaveIdNow = allLeavesInStorage.Leaves.Last().Id;
+                            for (int i = leaveIdAfterEdit; i <= lastLeaveIdNow; i++)
+                            {
+                                allLeavesInStorage.RemoveLeave(i);
+                            }
+
                             allLeavesInStorage.AddLeave(leaveToEdit, 0);
                             Console.WriteLine("Leave cannot be changed. Leave limit policy is violated.");
                         }
@@ -761,11 +768,17 @@
                 else
                 {
                     allLeavesInStorage.AddLeave(leaveAuxiliary, ableOnDemand);
+                    allLeavesInStorage.SplitLeaveIntoConsecutiveBusinessDaysBits(leaveAuxiliary);
                     ShowLeaveAvailableForAllPastYears(employee); //TEST PURPOSE
 
                     if (!IsLeaveLimitPolicySatisfied(employee))
                     {
-                        allLeavesInStorage.RemoveLeave(intOfLeaveToEdit);
+                        int lastLeaveIdNow = allLeavesInStorage.Leaves.Last().Id;
+                        for (int i = leaveIdAfterEdit; i <= lastLeaveIdNow; i++)
+                        {
+                            allLeavesInStorage.RemoveLeave(i);
+                        }
+
                         allLeavesInStorage.AddLeave(leaveToEdit, 0);
                         Console.WriteLine("Leave cannot be changed. Leave limit policy is violated.");
                     }
