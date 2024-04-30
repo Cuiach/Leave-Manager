@@ -4,11 +4,27 @@
     {
         public List<Leave> Leaves { get; set; } = [];
 
-        private static void DisplayLeaves(List<Leave> SetOfLeaves)
+        internal void SplitLeaveIntoConsecutiveBusinessDaysBits(Leave leave)
         {
-            foreach (var leave in SetOfLeaves)
+            int leaveId = leave.Id;
+            int employeeeId = leave.EmployeeId;
+            DateTime dateFrom = leave.DateFrom;
+            DateTime dateTo = leave.DateTo;
+            bool isOnDemand = leave.IsOnDemand;
+            RemoveLeave(leaveId);
+            WorkDaysCalculator workDaysCalculator = new();
+            List<List<DateTime>> listOfLeaves = workDaysCalculator.GetUninterruptedWorkDays(dateFrom, dateTo);
+
+            int i = 0;
+            foreach (var uninterruptedRange in listOfLeaves)
             {
-                Leave.DisplayLeaveDetails(leave);
+                Leave leaveHere = new(employeeeId, leaveId + i, false);
+                leaveHere.IsOnDemand = isOnDemand;
+                leaveHere.DateFrom = uninterruptedRange.First();
+                leaveHere.DateTo = uninterruptedRange.Last();
+
+                Leaves.Add(leaveHere);
+                i++;
             }
         }
 
@@ -31,42 +47,39 @@
             return true;
         }
 
-        public void AddLeave(Leave leave, int ommitterOnDemandAsk)
+        public void AddLeave(Leave leave, bool askIfOnDemand)
         {
-            if (leave.DateFrom.Year == DateTime.Now.Year && ommitterOnDemandAsk == 1)
+            if (leave.DateFrom.Year == DateTime.Now.Year && askIfOnDemand == true)
             {
-                Console.WriteLine("Is this leave On Demand? (click y or enter to skip)");
+                Console.WriteLine("Is this leave On Demand? (click y to nod or n to deny or enter to skip)");
                 if (Console.ReadLine() == "y")
                 {
                     leave.IsOnDemand = true;
                 }
+                else if (Console.ReadLine() == "n")
+                {
+                    leave.IsOnDemand = false;
+                }
             }
-
-            if (CheckOverlapping(leave))
-            {
-                Leaves.Add(leave);
-            }
-            else
-            {
-                Console.WriteLine("Leave cannot be added. Try again with correct dates.");
-            }
+            
+            Leaves.Add(leave);
         }
 
         public void DisplayAllLeaves()
         {
-            DisplayLeaves(Leaves);
+            AuxiliaryMethods.DisplayLeaves(Leaves);
         }
 
         public void DisplayAllLeavesOnDemand()
         {
             var onDemandLeaves = Leaves.Where(l => l.IsOnDemand).ToList();
-            DisplayLeaves((List<Leave>)onDemandLeaves);
+            AuxiliaryMethods.DisplayLeaves((List<Leave>)onDemandLeaves);
         }
 
         public void DisplayAllLeavesForEmployee(int employeeId)
         {
             var leavesOfEmployee = Leaves.Where(l => l.EmployeeId == employeeId).ToList();
-            DisplayLeaves((List<Leave>)leavesOfEmployee);
+            AuxiliaryMethods.DisplayLeaves((List<Leave>)leavesOfEmployee);
         }
 
         public void DisplayAllLeavesForEmployeeOnDemand(int employeeId)
@@ -74,7 +87,7 @@
             var leavesOfEmployeeOnDemand = Leaves.Where
                 (l => l.EmployeeId == employeeId).Where
                 (l => l.IsOnDemand).ToList();
-            DisplayLeaves((List<Leave>)leavesOfEmployeeOnDemand);
+            AuxiliaryMethods.DisplayLeaves((List<Leave>)leavesOfEmployeeOnDemand);
         }
 
         public void RemoveLeave(int intOfLeaveToRemove)

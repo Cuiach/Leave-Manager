@@ -45,5 +45,13 @@ namespace Inewi_Console.Entities
             newLimit = newLimit < 0 ? defaultNumber : newLimit;
             return newLimit;
         }
+
+        internal static void DisplayLeaves(List<Leave> SetOfLeaves)
+        {
+            foreach (var leave in SetOfLeaves)
+            {
+                Leave.DisplayLeaveDetails(leave);
+            }
+        }
     }
 }

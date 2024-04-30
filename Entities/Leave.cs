@@ -1,12 +1,27 @@
 ﻿namespace Inewi_Console.Entities
 {
-    public class Leave(int employeeId, int numberAsId)
+    public class Leave
     {
-        public int Id { get; set; } = numberAsId;
-        public int EmployeeId { get; set; } = employeeId;
-        public DateTime DateFrom {  get; set; } = DateTime.Today.Date.AddDays(-6);
-        public DateTime DateTo { get; set; } = DateTime.Today.Date;
-        public bool IsOnDemand { get; set; } = false;
+        public int Id { get; set; }
+        public int EmployeeId { get; set; }
+        public DateTime DateFrom { get; set; }
+        public DateTime DateTo { get; set; }
+        public bool IsOnDemand { get; set; }
+
+        public Leave(int employeeId, int numberAsId, bool isManuallyCreated)
+        {
+            Id = numberAsId;
+            EmployeeId = employeeId;
+
+            if (isManuallyCreated)
+            {
+                DateFrom = DateTime.Today.Date.AddDays(-6);
+                DateTo = DateTime.Today.Date;
+                IsOnDemand = false;
+            }
+            else
+            {}
+        }
 
         internal static void DisplayLeaveDetails(Leave leave)
         {
@@ -19,7 +34,8 @@
 
         internal int GetLeaveLength()
         {
-            return (DateTo - DateFrom).Days + 1;
+            WorkDaysCalculator workDaysCalculator = new();
+            return workDaysCalculator.CountWorkDaysBetweenDates(DateFrom, DateTo);
         }
  
         internal bool IsLeaveInOneYear()
@@ -33,6 +49,12 @@
             {
                 return true;
             }
+        }
+
+        internal int GetWorkDaysOfLeave()
+        {
+            WorkDaysCalculator calculator = new();
+            return calculator.CountWorkDaysBetweenDates(DateFrom, DateTo);
         }
     }
 }
