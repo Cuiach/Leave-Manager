@@ -4,12 +4,66 @@
     {
         public List<Leave> Leaves { get; set; } = [];
 
-        private static void DisplayLeaves(List<Leave> SetOfLeaves)
+        internal void SplitLeaveIntoConsecutiveBusinessDaysBits(Leave leave)
         {
-            foreach (var leave in SetOfLeaves)
+//            List<Leave> leaves = [];
+            int employeeeId = leave.EmployeeId;
+            int leaveId = leave.Id;
+            DateTime dateFrom = leave.DateFrom;
+            DateTime dateTo = leave.DateTo;
+            bool isOnDemand = leave.IsOnDemand;
+            RemoveLeave(leaveId);
+            WorkDaysCalculator workDaysCalculator = new();
+            List<List<DateTime>> listOfLeaves = workDaysCalculator.GetUninterruptedWorkDays(dateFrom, dateTo);
+
+            int i = 0;
+            foreach (var uninterruptedRange in listOfLeaves)
             {
-                Leave.DisplayLeaveDetails(leave);
+                Leave leaveHere = new(employeeeId, leaveId + i, false);
+                leaveHere.IsOnDemand = isOnDemand;
+                leaveHere.DateFrom = uninterruptedRange.First();
+                leaveHere.DateTo = uninterruptedRange.Last();
+
+                Leaves.Add(leaveHere);
+                i++;
             }
+
+            //int i = 0;
+            //leaves[i] = new Leave(employeeeId, leaveId, false);
+            //Leave leaveHere = leaves[i];
+
+            //do
+            //{
+            //    DayCharacteristic dayCharacteristic = new(dateFrom);
+            //    if (!dayCharacteristic.isBusinessDay)
+            //    {
+            //        leaveHere = leaves[i++];
+            //    }
+            //    else
+            //    {
+            //        if (leaveHere.DateFrom == null)
+            //        {
+            //            leaveHere.DateFrom = dateFrom;
+            //        }
+            //        leaveHere.DateTo = dateFrom;
+            //    }
+
+            //    if (dateFrom == dateTo)
+            //    { }
+            //    else
+            //    {
+            //        dateFrom = dateFrom.Date.AddDays(+1);
+            //    }
+            //} while (dateFrom != dateTo);
+
+            //foreach (Leave leaveInSet in leaves)
+            //{
+            //    if (leaveInSet.DateFrom != null)
+            //    {
+            //        leaveInSet.IsOnDemand = isOnDemand;
+            //        Leaves.Add(leaveInSet);
+            //    }
+            //}
         }
 
         public bool CheckOverlapping(Leave leave)
@@ -54,19 +108,19 @@
 
         public void DisplayAllLeaves()
         {
-            DisplayLeaves(Leaves);
+            AuxiliaryMethods.DisplayLeaves(Leaves);
         }
 
         public void DisplayAllLeavesOnDemand()
         {
             var onDemandLeaves = Leaves.Where(l => l.IsOnDemand).ToList();
-            DisplayLeaves((List<Leave>)onDemandLeaves);
+            AuxiliaryMethods.DisplayLeaves((List<Leave>)onDemandLeaves);
         }
 
         public void DisplayAllLeavesForEmployee(int employeeId)
         {
             var leavesOfEmployee = Leaves.Where(l => l.EmployeeId == employeeId).ToList();
-            DisplayLeaves((List<Leave>)leavesOfEmployee);
+            AuxiliaryMethods.DisplayLeaves((List<Leave>)leavesOfEmployee);
         }
 
         public void DisplayAllLeavesForEmployeeOnDemand(int employeeId)
@@ -74,7 +128,7 @@
             var leavesOfEmployeeOnDemand = Leaves.Where
                 (l => l.EmployeeId == employeeId).Where
                 (l => l.IsOnDemand).ToList();
-            DisplayLeaves((List<Leave>)leavesOfEmployeeOnDemand);
+            AuxiliaryMethods.DisplayLeaves((List<Leave>)leavesOfEmployeeOnDemand);
         }
 
         public void RemoveLeave(int intOfLeaveToRemove)

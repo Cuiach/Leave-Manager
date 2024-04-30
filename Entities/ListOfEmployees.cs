@@ -590,7 +590,7 @@
             Employee employee = Employees.FirstOrDefault(e => e.Id == employeeId);
 
             int lastAddedLeaveId = allLeavesInStorage.Leaves.Count == 0 ? 0 : allLeavesInStorage.Leaves.LastOrDefault().Id;
-            Leave leave = new(employeeId, lastAddedLeaveId + 1);
+            Leave leave = new(employeeId, lastAddedLeaveId + 1, true);
 
             Console.WriteLine("Default leave dates are set to: from {0}, to {1}. Do you want to keep them? Press enter if yes. Put n and enter if you want to set the dates manually", leave.DateFrom.ToString("yyyy-MM-dd"), leave.DateTo.ToString("yyyy-MM-dd"));
             if (Console.ReadLine() == "n")
@@ -633,7 +633,7 @@
                 }
             }
 
-            if(!IsLeaveAfterDateOfRecruitment(employee, leave) || !leave.IsLeaveInOneYear())
+            if (!IsLeaveAfterDateOfRecruitment(employee, leave) || !leave.IsLeaveInOneYear())
             {
                 return;
             }
@@ -642,12 +642,17 @@
             _ = IsOnDemandLimitSatisfied(employee, leave.GetLeaveLength()) ? ableOnDemand = 1 : 0;
 
             allLeavesInStorage.AddLeave(leave, ableOnDemand);
-           
+            allLeavesInStorage.SplitLeaveIntoConsecutiveBusinessDaysBits(leave);
+
             ShowLeaveAvailableForAllPastYears(employee); //TEST PURPOSE
 
             if (!IsLeaveLimitPolicySatisfied(employee))
             {
-                RemoveLeave(leave.Id);
+                int nowLastAddedLeaveId = allLeavesInStorage.Leaves.Count == 0 ? 0 : allLeavesInStorage.Leaves.LastOrDefault().Id;
+                for (int i = leave.Id; i <= nowLastAddedLeaveId; i++)
+                {
+                    RemoveLeave(i);
+                }
                 Console.WriteLine("Leave is not added. Leave limit policy is violated.");
             }
         }
@@ -688,7 +693,7 @@
             else
             {
                 Employee employee = Employees.First(e => e.Id == leaveToEdit.EmployeeId);
-                Leave leaveAuxiliary = new(leaveToEdit.EmployeeId, leaveToEdit.Id)
+                Leave leaveAuxiliary = new(leaveToEdit.EmployeeId, leaveToEdit.Id, true)
                 {
                     DateFrom = leaveToEdit.DateFrom,
                     DateTo = leaveToEdit.DateTo,
