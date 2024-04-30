@@ -12,9 +12,11 @@
         {
             string onDemand = "ON DEMAND";
             string notOnDemand = "NOT On Demand";
-            Console.WriteLine($"Leave details Id={leave.Id}, Employee Id={leave.EmployeeId}, leave from: {leave.DateFrom}, leave to: {leave.DateTo}, {(leave.IsOnDemand ? onDemand : notOnDemand)}");
+            string dateFrom = leave.DateFrom.ToString("yyyy-MM-dd");
+            string dateTo = leave.DateTo.ToString("yyyy-MM-dd");
+            Console.WriteLine($"Leave details Id={leave.Id}, Employee Id={leave.EmployeeId}, leave from: {dateFrom}, leave to: {dateTo}, {(leave.IsOnDemand ? onDemand : notOnDemand)}");
         }
-        
+
         internal int GetLeaveLength()
         {
             return (DateTo - DateFrom).Days + 1;
