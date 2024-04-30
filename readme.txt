@@ -1,3 +1,9 @@
+2024.04.30
+To do:
+1. Obsługa, gdy urlop zahacza o 2 lata.
+2. Obsługa dni wolnych innych niż soboty i niedziele.
+3. Pokazywanie urlopów według dat rozpoczęcia.
+
 2024.04.29 NIEAKTUALNE, bo zrobione (na razie dla sobót i niedziel, ale logika jest. Teraz można rozszerzyć o inne dni wolne.)
 Zabieram się za odjęcie dni nieroboczych a więc za wyliczanie poprawnych urlopów.
 
