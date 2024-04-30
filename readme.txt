@@ -1,3 +1,6 @@
+2024.04.29 NIEAKTUALNE, bo zrobione (na razie dla sobót i niedziel, ale logika jest. Teraz można rozszerzyć o inne dni wolne.)
+Zabieram się za odjęcie dni nieroboczych a więc za wyliczanie poprawnych urlopów.
+
 2024.04.24 NIEAKTUALNE - jest check
 W apce można dowolnie zmienić limity urlopowe za poprzednie lata i nie sprawdzam możliwości do tyłu (tak jak np. przy zmianie polityki wykorzystywania zaległych urlopów). Można by sprawdzać, ale zakładam, że nie trzeba na razie. W kazdym razie jest to potencjalny punkt zapalny, którym można sobie uniemożliwić wpisywanie nowych urlopów, bo sprawdzenie polityki urlopów za poprzednie lata wykaże błąd.
 
