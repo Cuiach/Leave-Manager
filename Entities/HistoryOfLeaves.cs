@@ -47,25 +47,22 @@
             return true;
         }
 
-        public void AddLeave(Leave leave, int ommitterOnDemandAsk)
+        public void AddLeave(Leave leave, bool askIfOnDemand)
         {
-            if (leave.DateFrom.Year == DateTime.Now.Year && ommitterOnDemandAsk == 1)
+            if (leave.DateFrom.Year == DateTime.Now.Year && askIfOnDemand == true)
             {
-                Console.WriteLine("Is this leave On Demand? (click y or enter to skip)");
+                Console.WriteLine("Is this leave On Demand? (click y to nod or n to deny or enter to skip)");
                 if (Console.ReadLine() == "y")
                 {
                     leave.IsOnDemand = true;
                 }
+                else if (Console.ReadLine() == "n")
+                {
+                    leave.IsOnDemand = false;
+                }
             }
-
-            if (CheckOverlapping(leave))
-            {
-                Leaves.Add(leave);
-            }
-            else
-            {
-                Console.WriteLine("Leave cannot be added. Try again with correct dates.");
-            }
+            
+            Leaves.Add(leave);
         }
 
         public void DisplayAllLeaves()
