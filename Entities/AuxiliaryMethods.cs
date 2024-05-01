@@ -46,9 +46,10 @@ namespace Inewi_Console.Entities
             return newLimit;
         }
 
-        internal static void DisplayLeaves(List<Leave> SetOfLeaves)
+        internal static void DisplayLeaves(List<Leave> setOfLeaves)
         {
-            foreach (var leave in SetOfLeaves)
+            List<Leave> orderedLeaves = [.. setOfLeaves.OrderBy(l => l.DateFrom)];
+            foreach (var leave in orderedLeaves)
             {
                 Leave.DisplayLeaveDetails(leave);
             }
