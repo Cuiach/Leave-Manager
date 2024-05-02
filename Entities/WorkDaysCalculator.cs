@@ -52,7 +52,9 @@
 
         private bool IsBusinessDay(DateTime date)
         {
-            return date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday;
+            FreeDays freeAdditionalDaysCalculator = new FreeDays();
+            var freeAdditionalDays = freeAdditionalDaysCalculator.GetFreeDaysOfYear(date.Year);
+            return date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday && !freeAdditionalDays.ContainsKey(date);
         }
     }
 }
