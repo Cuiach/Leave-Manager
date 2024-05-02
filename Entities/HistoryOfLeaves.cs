@@ -52,14 +52,10 @@
             if (leave.DateFrom.Year == DateTime.Now.Year && askIfOnDemand == true)
             {
                 Console.WriteLine("Is this leave On Demand? (click y to nod or n to deny or enter to skip)");
-                if (Console.ReadLine() == "y")
-                {
-                    leave.IsOnDemand = true;
-                }
-                else if (Console.ReadLine() == "n")
-                {
-                    leave.IsOnDemand = false;
-                }
+
+                string input = Console.ReadLine();
+
+                bool _ = (input == "y") ? (leave.IsOnDemand = true) : ((input == "n") ? leave.IsOnDemand = false : true);
             }
             
             Leaves.Add(leave);
