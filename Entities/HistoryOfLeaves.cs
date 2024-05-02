@@ -53,21 +53,9 @@
             {
                 Console.WriteLine("Is this leave On Demand? (click y to nod or n to deny or enter to skip)");
 
-//               string input = Console.ReadLine() == "y" ? leave.IsOnDemand = true : (input == "n") ? : 
-
                 string input = Console.ReadLine();
 
                 bool _ = (input == "y") ? (leave.IsOnDemand = true) : ((input == "n") ? leave.IsOnDemand = false : true);
-
-                //if (input == "y")
-                //{
-                //    leave.IsOnDemand = true;
-                //}
-                //else if (input == "n")
-                //{
-                //    leave.IsOnDemand = false;
-                //}
-
             }
             
             Leaves.Add(leave);
