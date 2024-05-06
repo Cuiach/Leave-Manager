@@ -377,14 +377,6 @@ namespace Inewi_Console.Entities
                 Console.WriteLine($"On demand leave limit: {employee.OnDemandPerYear} days");
             }
 
-            //LeaveLimit leaveLimitThisYear = employee.LeaveLimits.FirstOrDefault(l => l.Year == DateTime.Now.Year);
-            //if (leaveLimitThisYear == null)
-            //{
-            //    employee.PropagateLeaveLimitForCurrentYear(employee.LeavesPerYear, false);
-            //    //leaveLimitThisYear = new(DateTime.Now.Year, employee.LeavesPerYear);
-            //    //employee.LeaveLimits.Add(leaveLimitThisYear);
-            //}
-
             Console.WriteLine($"Leave days per year for the employee - is it {employee.LeavesPerYear}? If yes press enter; if not put correct number and enter");
             Employee auxiliaryEmployee = new("aux", "emp", 0);
             auxiliaryEmployee.LeavesPerYear = employee.LeavesPerYear;
