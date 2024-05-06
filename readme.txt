@@ -1,8 +1,12 @@
-2024.04.30
+2024.05.04
+To do:
+1. Leave that spans across 2 calendar years.
+
+2024.04.30 NIEAKTUALNE
 To do:
 1. Obsługa, gdy urlop zahacza o 2 lata.
-2. Obsługa dni wolnych innych niż soboty i niedziele.
-3. Pokazywanie urlopów według dat rozpoczęcia.
+DONE 2. Obsługa dni wolnych innych niż soboty i niedziele.
+DONE 3. Pokazywanie urlopów według dat rozpoczęcia.
 
 2024.04.29 NIEAKTUALNE, bo zrobione (na razie dla sobót i niedziel, ale logika jest. Teraz można rozszerzyć o inne dni wolne.)
 Zabieram się za odjęcie dni nieroboczych a więc za wyliczanie poprawnych urlopów.

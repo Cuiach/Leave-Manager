@@ -38,17 +38,11 @@
             return workDaysCalculator.CountWorkDaysBetweenDates(DateFrom, DateTo);
         }
  
-        internal bool IsLeaveInOneYear()
+        internal int HowManyCalendarYearsLeaveSpans()
         {
-            if (DateFrom.Year != DateTo.Year)
-            {
-                Console.WriteLine("Leave must be within one calendar year. Try again with correct dates.");
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            int yearFrom = DateFrom.Year;
+            int yearTo = DateTo.Year;
+                return yearFrom - yearTo + 1;
         }
 
         internal int GetWorkDaysOfLeave()
