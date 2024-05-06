@@ -654,9 +654,6 @@ namespace Inewi_Console.Entities
                 Console.WriteLine("Leave cannot be added. Try again with correct dates.");
                 return;
             }
-
-// HERE - to split the above from the below and extract one part as a separate method.
-// Then - add cross-year leave management somewhere here
             
             if (leave.HowManyCalendarYearsLeaveSpans() == 1)
             {
@@ -775,7 +772,7 @@ namespace Inewi_Console.Entities
 
             if (leaveAuxiliary.HowManyCalendarYearsLeaveSpans() != 1)
             {
-                Console.WriteLine("Leave cannot be added. Leave must be within one calendar year.");
+                Console.WriteLine("Please, edit leave only within one calendar year. Consider adding a new leave for another year.");
                 return;
             }
 
