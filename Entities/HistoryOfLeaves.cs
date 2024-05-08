@@ -28,6 +28,35 @@
             }
         }
 
+        internal int GetLastLeaveYearOfEmployee(int employeeId)
+        {
+            int year;
+
+            var leaves = Leaves.Where(l => l.EmployeeId == employeeId).ToList();
+
+            if (leaves.Count == 0)
+            {
+                year = 0;
+            }
+            else
+            {
+                DateTime lastLeaveDate = leaves.Max(l => l.DateTo);
+                year = lastLeaveDate.Year;
+            }
+
+            Console.WriteLine($" /n latest leave year: {year} /n"); //TEST PURPOSE
+
+            return year;
+
+            //var leaveSet = Leaves
+            //.GroupBy(l => l.EmployeeId == employeeId)
+            //.Select(leaves => leaves.OrderByDescending(l => l.DateTo).First());
+
+            //Leave latestLeaveOfEmployee = leaveSet.FirstOrDefault();
+
+            //return (latestLeaveOfEmployee == null) ? 0 : latestLeaveOfEmployee.DateTo.Year;
+        }
+
         public bool CheckOverlapping(Leave leave)
         {
             List<Leave> leavesOverlapping = Leaves.Where
