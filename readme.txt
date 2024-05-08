@@ -1,6 +1,6 @@
 2024.05.04
 To do:
-1. Leave that spans across 2 calendar years.
+DONE (for Add leave) 1. Leave that spans across 2 calendar years.
 
 2024.04.30 NIEAKTUALNE
 To do:
@@ -11,7 +11,7 @@ DONE 3. Pokazywanie urlopów według dat rozpoczęcia.
 2024.04.29 NIEAKTUALNE, bo zrobione (na razie dla sobót i niedziel, ale logika jest. Teraz można rozszerzyć o inne dni wolne.)
 Zabieram się za odjęcie dni nieroboczych a więc za wyliczanie poprawnych urlopów.
 
-2024.04.24 NIEAKTUALNE - jest check
+2024.04.24 NIEAKTUALNE - ZROBIONE
 W apce można dowolnie zmienić limity urlopowe za poprzednie lata i nie sprawdzam możliwości do tyłu (tak jak np. przy zmianie polityki wykorzystywania zaległych urlopów). Można by sprawdzać, ale zakładam, że nie trzeba na razie. W kazdym razie jest to potencjalny punkt zapalny, którym można sobie uniemożliwić wpisywanie nowych urlopów, bo sprawdzenie polityki urlopów za poprzednie lata wykaże błąd.
 
 2024.04.17 NIEAKTUALNE - ZROBIONE
