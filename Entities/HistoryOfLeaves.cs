@@ -28,6 +28,25 @@
             }
         }
 
+        internal int GetLastLeaveYearOfEmployee(int employeeId)
+        {
+            int year;
+
+            var leaves = Leaves.Where(l => l.EmployeeId == employeeId).ToList();
+
+            if (leaves.Count == 0)
+            {
+                year = 0;
+            }
+            else
+            {
+                DateTime lastLeaveDate = leaves.Max(l => l.DateTo);
+                year = lastLeaveDate.Year;
+            }
+
+            return year;
+        }
+
         public bool CheckOverlapping(Leave leave)
         {
             List<Leave> leavesOverlapping = Leaves.Where
