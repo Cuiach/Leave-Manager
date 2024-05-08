@@ -44,17 +44,7 @@
                 year = lastLeaveDate.Year;
             }
 
-            Console.WriteLine($" /n latest leave year: {year} /n"); //TEST PURPOSE
-
             return year;
-
-            //var leaveSet = Leaves
-            //.GroupBy(l => l.EmployeeId == employeeId)
-            //.Select(leaves => leaves.OrderByDescending(l => l.DateTo).First());
-
-            //Leave latestLeaveOfEmployee = leaveSet.FirstOrDefault();
-
-            //return (latestLeaveOfEmployee == null) ? 0 : latestLeaveOfEmployee.DateTo.Year;
         }
 
         public bool CheckOverlapping(Leave leave)

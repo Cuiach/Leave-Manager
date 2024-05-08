@@ -45,8 +45,12 @@ namespace Inewi_Console.Entities
         {
             for (int i = DateTime.Today.Year;  i <= yearTo; i++)
             {
-                LeaveLimit limit = new(i, employee.LeavesPerYear);
-                employee.LeaveLimits.Add(limit);
+                LeaveLimit newLimit = new(i, employee.LeavesPerYear);
+                var limitForYear = employee.LeaveLimits.Where(l => l.Year == i).FirstOrDefault();
+                if (limitForYear == null)
+                {
+                    employee.LeaveLimits.Add(newLimit);
+                }
             }
         }
 
