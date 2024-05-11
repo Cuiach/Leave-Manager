@@ -1,6 +1,4 @@
-﻿using Inewi_Console.Entities;
-
-namespace Inewi_Console.Entities
+﻿namespace Inewi_Console.Entities
 {
     public class ListOfEmployees
     {
@@ -43,7 +41,7 @@ namespace Inewi_Console.Entities
 
         private void FillUpLeaveLimitsForFutureYears(Employee employee, int yearTo)
         {
-            for (int i = DateTime.Today.Year;  i <= yearTo; i++)
+            for (int i = DateTime.Today.Year; i <= yearTo; i++)
             {
                 LeaveLimit newLimit = new(i, employee.LeavesPerYear);
                 var limitForYear = employee.LeaveLimits.Where(l => l.Year == i).FirstOrDefault();
@@ -56,10 +54,10 @@ namespace Inewi_Console.Entities
 
         private bool CheckIfLeaveLimitExistsForCurrentYear(Employee employee)
         {
-            if(!employee.LeaveLimitForCurrentYearExists())
+            if (!employee.LeaveLimitForCurrentYearExists())
             {
                 Console.WriteLine("It looks there is one or more employees who do not have leave limit set for this year. Do you want to fill leave limits in all missing places? Put y if yes");
-                if(Console.ReadLine() == "y")
+                if (Console.ReadLine() == "y")
                 {
                     PropagateLeaveLimitsForCurrentYearForAllEmployees();
                     return true;
@@ -88,9 +86,9 @@ namespace Inewi_Console.Entities
 
             Console.Write($"Employee: {employee.FirstName}, {employee.LastName}, {employee.Id}, leaves: {leaveDaysTaken}/{leaveDaysAvailable}, " +
                 $"on demand: {onDemandTaken}/{employee.OnDemandPerYear}, joined: {employee.DayOfJoining.Year}.{employee.DayOfJoining.Month}.{employee.DayOfJoining.Day},");
-            
-            int nowOrFutureYearIfFutureLeaveExists = 
-                DateTime.Now.Year >= allLeavesInStorage.GetLastLeaveYearOfEmployee(employee.Id) ? 
+
+            int nowOrFutureYearIfFutureLeaveExists =
+                DateTime.Now.Year >= allLeavesInStorage.GetLastLeaveYearOfEmployee(employee.Id) ?
                 DateTime.Now.Year : allLeavesInStorage.GetLastLeaveYearOfEmployee(employee.Id);
 
             for (int i = employee.DayOfJoining.Year; i <= nowOrFutureYearIfFutureLeaveExists; i++)
@@ -156,7 +154,7 @@ namespace Inewi_Console.Entities
                     {
                         case "0":
                             employee.HowManyYearsToTakePastLeave = Employee.YearsToTakeLeave.CurrentOnly;
-                            
+
                             if (IsLeaveLimitPolicySatisfied(employee, 0))
                             {
                                 Console.WriteLine("Accrued leave cap set to: current year only.");
@@ -166,7 +164,7 @@ namespace Inewi_Console.Entities
                                 employee.HowManyYearsToTakePastLeave = employeeAuxiliary.HowManyYearsToTakePastLeave;
                                 Console.WriteLine("Accrued leave cap cannot be set to: current year only. Leave limit policy violated.");
                             }
-                            
+
                             break;
 
                         case "1":
@@ -186,7 +184,7 @@ namespace Inewi_Console.Entities
 
                         case "2":
                             employee.HowManyYearsToTakePastLeave = Employee.YearsToTakeLeave.TwoMore;
-                            
+
                             if (IsLeaveLimitPolicySatisfied(employee, 0))
                             {
                                 Console.WriteLine("Accrued leave cap set to: 2 more past years.");
@@ -320,7 +318,7 @@ namespace Inewi_Console.Entities
             var firstName = Console.ReadLine();
             Console.WriteLine("Insert last name");
             var lastName = Console.ReadLine();
-            
+
             if (firstName != null && lastName != null)
             {
                 int newEmployeeId = Employees.Count == 0 ? 1 : Employees.LastOrDefault().Id + 1;
@@ -463,7 +461,7 @@ namespace Inewi_Console.Entities
             }
             return true;
         }
-        
+
         private bool IsOnDemandLimitSatisfied(Employee employee, int newOnDemandLeaveLength)
         {
             int onDemandTaken = allLeavesInStorage.GetSumOnDemand(employee.Id);
@@ -476,7 +474,7 @@ namespace Inewi_Console.Entities
                 return false;
             }
         }
-        
+
         private static bool IsLeaveAfterDateOfRecruitment(Employee employee, Leave leave)
         {
             if (leave.DateFrom < employee.DayOfJoining)
@@ -489,12 +487,12 @@ namespace Inewi_Console.Entities
                 return true;
             }
         }
-        
+
         private int ExcessLeaveFromPastYearCurrentOnly(Employee employee, int k)
         {
             return 0;
         } //name may be misleading... "CurrentOnly" refers to for how many years not-taken past leave may be taken. In this method - only in current year.
-        
+
         private int ExcessLeaveFromPastYearOneMore(Employee employee, int k)
         {
             LeaveLimit leaveLimitInYearK = employee.LeaveLimits.First(l => l.Year == k);
@@ -509,7 +507,7 @@ namespace Inewi_Console.Entities
                 return leaveLimitInYearK.Limit - sumOfLeavesInYearK;
             }
         }
-        
+
         private int ExcessLeaveFromPastYearTwoMore(Employee employee, int k)
         {
             LeaveLimit leaveLimitInYearK = employee.LeaveLimits.First(l => l.Year == k);
@@ -530,7 +528,7 @@ namespace Inewi_Console.Entities
                 return result;
             }
         }
-        
+
         private int ExcessLeaveFromPastYearNoLimit(Employee employee, int k)
         {
             LeaveLimit leaveLimitInYearK = employee.LeaveLimits.First(l => l.Year == k);
@@ -545,7 +543,7 @@ namespace Inewi_Console.Entities
                 return leaveLimitInYearK.Limit - sumOfLeavesInYearK;
             }
         }
-        
+
         private int CountExcessLeaveFromPast(Employee employee, int year)
         {
             int countedExcess = 0;
@@ -566,7 +564,7 @@ namespace Inewi_Console.Entities
             }
             return countedExcess;
         }
-        
+
         private int CountLeaveAvailable(Employee employee, int year, int whetherToDisplayLeaveDetails)
         {
             int result = 0;
@@ -584,11 +582,11 @@ namespace Inewi_Console.Entities
             }
             return result;
         }
-        
+
         private void ShowLeaveAvailableForAllPastYears(Employee employee) //rather for test purpose
         {
             int startingYear = employee.DayOfJoining.Year;
-            int endingYear = 
+            int endingYear =
                 allLeavesInStorage.GetLastLeaveYearOfEmployee(employee.Id) <= DateTime.Now.Year ?
                 DateTime.Now.Year : allLeavesInStorage.GetLastLeaveYearOfEmployee(employee.Id);
 
@@ -658,7 +656,7 @@ namespace Inewi_Console.Entities
 
         public void AddLeave(int employeeId)
         {
-            if(!EmployeeExists(employeeId))
+            if (!EmployeeExists(employeeId))
             {
                 return;
             };
@@ -669,7 +667,7 @@ namespace Inewi_Console.Entities
             Leave leave = new(employeeId, lastAddedLeaveId + 1, true);
 
             if (!GetNewDatesOfLeave(leave, employee, true))
-            { 
+            {
                 return;
             }
 
@@ -678,7 +676,7 @@ namespace Inewi_Console.Entities
                 Console.WriteLine("Leave cannot be added. Try again with correct dates.");
                 return;
             }
-            
+
             if (leave.HowManyCalendarYearsLeaveSpans() == 1)
             {
                 bool ableOnDemand = false;
@@ -698,7 +696,7 @@ namespace Inewi_Console.Entities
                     }
                     Console.WriteLine("Leave is not added. Leave limit policy is violated.");
                 }
-            } 
+            }
             else
             {
                 Leave firstLeave = new(employee.Id, lastAddedLeaveId + 1, true);
@@ -735,32 +733,32 @@ namespace Inewi_Console.Entities
                 }
             }
         }
-        
+
         public void DisplayAllLeaves()
         {
             allLeavesInStorage.DisplayAllLeaves();
         }
-        
+
         public void DisplayAllLeavesOnDemand()
         {
             allLeavesInStorage.DisplayAllLeavesOnDemand();
         }
-        
+
         public void DisplayAllLeavesForEmployee(int employeeId)
         {
             allLeavesInStorage.DisplayAllLeavesForEmployee(employeeId);
         }
-        
+
         public void DisplayAllLeavesForEmployeeOnDemand(int employeeId)
         {
             allLeavesInStorage.DisplayAllLeavesForEmployeeOnDemand(employeeId);
         }
-        
+
         public void RemoveLeave(int intOfLeaveToRemove)
         {
             allLeavesInStorage.RemoveLeave(intOfLeaveToRemove);
         }
- 
+
         public void EditLeave(int intOfLeaveToEdit)
         {
             var leaveToEdit = allLeavesInStorage.Leaves.FirstOrDefault(l => l.Id == intOfLeaveToEdit);

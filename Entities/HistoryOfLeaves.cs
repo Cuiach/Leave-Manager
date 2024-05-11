@@ -76,7 +76,7 @@
 
                 bool _ = (input == "y") ? (leave.IsOnDemand = true) : ((input == "n") ? leave.IsOnDemand = false : true);
             }
-            
+
             Leaves.Add(leave);
         }
 
@@ -144,7 +144,7 @@
             return sumOfOnDemandDays;
         }
 
-        public int CountSumOfPastYearLeaveDays(int employeeId, int year) 
+        public int CountSumOfPastYearLeaveDays(int employeeId, int year)
         {
             int sumOfPreviousYearLeaveDays = 0;
             foreach (var leave in Leaves)
