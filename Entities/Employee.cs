@@ -5,7 +5,6 @@
         public int Id { get; set; } = id;
         public string FirstName { get; set; } = firstName;
         public string LastName { get; set; } = lastName;
-        public int? WorkingYears { get; set; }
         public DateTime DayOfJoining { get; set; }
         public List<LeaveLimit> LeaveLimits { get; set; } = [];
         public enum YearsToTakeLeave
