@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Inewi_Console.Entities
+namespace Leave_Manager_Console.Entities
 {
     internal class AuxiliaryMethods
     {

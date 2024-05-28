@@ -1,4 +1,4 @@
-﻿namespace Inewi_Console.Entities
+﻿namespace Leave_Manager_Console.Entities
 {
     public class LeaveLimit
     {

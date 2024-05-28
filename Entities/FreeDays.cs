@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Inewi_Console.Entities
+namespace Leave_Manager_Console.Entities
 {
     internal class FreeDays
     {

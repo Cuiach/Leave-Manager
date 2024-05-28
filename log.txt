@@ -1,0 +1,243 @@
+* commit daa74f15801e6be1d3f0efc730e9d133c65f9d31
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Mon May 13 10:39:32 2024 +0200
+| 
+|     Very little refactor
+| 
+* commit ab55f2ca36a3d52e6473b4eb0f2157d9469edf91
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Mon May 13 10:36:54 2024 +0200
+| 
+|     Readme.txt updated
+| 
+* commit aa934ae3c6c4450a3d1d1610ab781f17eee10bef
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Mon May 13 09:02:23 2024 +0200
+| 
+|     First unit tests were added.
+| 
+* commit f5e2244f07d108c1a367fb684736f8a8e4cccb32
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Sat May 11 20:19:43 2024 +0200
+| 
+|     Slight changes, refactor
+|   
+*   commit bad6c08bd34c20d5378a8e496e90d6e66d3f4f7f
+|\  Merge: c237f1a 6f32627
+| | Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| | Date:   Wed May 8 12:16:47 2024 +0200
+| | 
+| |     Merge branch 'feature/fill-up-leave-limits-for-future-in-case-of-future-leave'
+| | 
+| * commit 6f326277006cf2b22b740d74ce11bd92ec8ae75f
+| | Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| | Date:   Wed May 8 12:15:44 2024 +0200
+| | 
+| |     Small bug fix
+| | 
+| * commit 2039a6e24f2586adcc8113054a7c6f70bdf782aa
+|/  Author: Cuiach PytoNA <ciachpytona@gmail.com>
+|   Date:   Wed May 8 12:06:42 2024 +0200
+|   
+|       Feature done: in case of future leave, fill up leave limits for future
+| 
+* commit c237f1a593f4ef843c7744086bb0eb11e1cee942
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Wed May 8 10:45:09 2024 +0200
+| 
+|     Readme.txt updated
+| 
+* commit dbb5a2e9fd40d913dd831df0e68fb24db10248fb
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Wed May 8 08:16:56 2024 +0200
+| 
+|     Readme.txt updated
+| 
+* commit 0d5635ad4e291055a3702cc3a36f6844eb2f2d8f
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Mon May 6 15:34:33 2024 +0200
+| 
+|     little refactor
+| 
+* commit 15db747b17a2ff6b41d2eebebc720728ebb3ca80
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Mon May 6 12:30:28 2024 +0200
+| 
+|     feature done - Add cross-year leave (no corresponding feature to edit leave)
+| 
+* commit 27c21a5bbd47d9f982b43cc4f29871e4a2408792
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Mon May 6 11:49:20 2024 +0200
+| 
+|     Add cross-year leave - done
+|   
+*   commit 876f4efe182ab088695df0ac7f6e3d4af3e55315
+|\  Merge: eff412e a61ad70
+| | Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| | Date:   Thu May 2 16:31:41 2024 +0200
+| | 
+| |     Merge branch 'feature/additional-free-days'
+| | 
+| * commit a61ad70ac6dd68b37b98a679c0d6898089360234
+| | Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| | Date:   Thu May 2 16:29:30 2024 +0200
+| | 
+| |     It seems it is working, surprising
+| | 
+| * commit 7e07afe0cc58c6960c3b7757b97a10bd597e6c0d
+|/  Author: Cuiach PytoNA <ciachpytona@gmail.com>
+|   Date:   Thu May 2 14:37:12 2024 +0200
+|   
+|       Immovable national holidays are excluded from leave days now; plus little refactor
+| 
+* commit eff412e16bb1f75749b3a6c62b1ec9668898f57c
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Wed May 1 17:13:56 2024 +0200
+| 
+|     Feature: leaves ordered by date when displaying all or a set of them.
+| 
+* commit 74bdb533b0f578a3841c2443bdc173922e5abe3d
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Tue Apr 30 22:18:07 2024 +0200
+| 
+|     Readme changed and 1 more file - one letter change
+| 
+* commit 8e1d4ca36fc2cfc54541b66593d10e8c80e5f2b0
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Tue Apr 30 22:12:48 2024 +0200
+| 
+|     Readme.txt updated.
+|   
+*   commit ab704d036ee01c330687b4aa52935d139fa99462
+|\  Merge: 9d54005 9790e31
+| | Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| | Date:   Tue Apr 30 22:09:37 2024 +0200
+| | 
+| |     Merge branch 'feature/workdays-excluding-free-days'
+| | 
+| * commit 9790e31adb97d5072781130035a4135282400d11
+| | Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| | Date:   Tue Apr 30 22:08:54 2024 +0200
+| | 
+| |     Perhaps ready; I am suspicious though.
+| | 
+| * commit b56ac2d563a7f242b5531503f543cf1310bee701
+| | Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| | Date:   Tue Apr 30 16:05:45 2024 +0200
+| | 
+| |     some changes made, not ready though
+| | 
+| * commit 180f58f2e407a6e6c49a96dabc3cb6437be7ce05
+| | Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| | Date:   Tue Apr 30 10:07:56 2024 +0200
+| | 
+| |     working days - part of work done
+| |   
+* |   commit 9d5400596b3f20a7c61c14dcd78b92eb9a865182
+|\ \  Merge: a086c21 b3721fc
+| |/  Author: Cuiach PytoNA <ciachpytona@gmail.com>
+|/|   Date:   Tue Apr 30 11:33:33 2024 +0200
+| |   
+| |       Merge branch 'fix/leave-date-format'
+| | 
+| * commit b3721fc4bad6ab4562396f1216788eda728a6cee
+|/  Author: Cuiach PytoNA <ciachpytona@gmail.com>
+|   Date:   Tue Apr 30 11:29:11 2024 +0200
+|   
+|       Leave start and end date display format changed to rrrr-MM-dd
+| 
+* commit a086c2152c34ff0cecf395f54345afb0ddf7245c
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Fri Apr 26 12:33:04 2024 +0200
+| 
+|     Added feature: check if on demand limit may be changed without violating current year leaves already submitted
+| 
+* commit 69609e88f83dc3ccd04b8a77dee5bfcf93d34b47
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Fri Apr 26 09:59:57 2024 +0200
+| 
+|     Refactor - propagate leave limit for current year for employee
+| 
+* commit 3cdaaa6dc2d4e7630a96e71d984d2738318347a5
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Thu Apr 25 12:50:04 2024 +0200
+| 
+|     Added feature: leave limit policy check added when changing leave limit for employee
+| 
+* commit 0bdf53a99cb54b5556ac5107892e6889d91a4e19
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Wed Apr 24 22:13:20 2024 +0200
+| 
+|     Added feature: leave limit policy check when changing leave limits or accrued leave cap, plus refactor
+| 
+* commit 3ce85b4bdafaf479d1c628b3cbf858e62490ac0c
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Tue Apr 23 11:51:59 2024 +0200
+| 
+|     Very little refactor
+| 
+* commit ad36a739f006d0e2055fc1637ea27859c5e6de3a
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Tue Apr 23 11:41:29 2024 +0200
+| 
+|     New year missing leave limit - fixed + slight refactor
+| 
+* commit 1af5614f0ffc93b4ddcdc99e4a526b315c7399a5
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Tue Apr 23 10:35:00 2024 +0200
+| 
+|     slight refactor, no feature changes
+| 
+* commit 67e1a6ad5558e0bc1d989377af387861ad6af601
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Thu Apr 18 09:23:53 2024 +0200
+| 
+|     readme.txt file updated
+| 
+* commit d882e38bb2bbd1dc01a3c9104cd7c4779143a705
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Thu Apr 18 09:11:29 2024 +0200
+| 
+|     The 1st version of working app; no EF, no UT for the moment
+| 
+* commit bd1e646a9b140cf40fe5bb7d2327d657975dfa4c
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Tue Mar 26 20:35:56 2024 +0100
+| 
+|     added was/were: store of settings for employee (leave per year, on demand per year, and again both - for first working year)
+| 
+* commit ecb869e1ce9b44d57a55310ced620aa403668c4b
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Fri Mar 22 15:07:02 2024 +0100
+| 
+|     added feature: edit leave
+| 
+* commit 7fa54204edd7e6af99eca888f6dc0cfb9965dcb6
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Fri Mar 22 14:47:37 2024 +0100
+| 
+|     added features: add leave, list out all leaves, remove leave
+| 
+* commit 434df77f3913b11599dc04ed37bbad4017959b5e
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Fri Mar 22 10:31:49 2024 +0100
+| 
+|     features: add employee, remove employee, list all employees, search for employee
+| 
+* commit 83a921a0123b2ac23a0b1872918fea38d21f07f6
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Mon Mar 18 11:02:12 2024 +0100
+| 
+|     again gitignore is updated
+| 
+* commit be916734c1f4c5e6503a7aa3aff963a6dd286cf2
+| Author: Cuiach PytoNA <ciachpytona@gmail.com>
+| Date:   Mon Mar 18 10:59:32 2024 +0100
+| 
+|     gitignore is updated
+| 
+* commit acab1405d7659049dfb68b77fd697847f1e68ae7
+  Author: Cuiach PytoNA <ciachpytona@gmail.com>
+  Date:   Mon Mar 18 10:57:52 2024 +0100
+  
+      gitgnore is added
