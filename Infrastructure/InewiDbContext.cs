@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Inewi_Console.Entities;
+using Leave_Manager_Console.Entities;
 
-namespace Inewi_Console.Infrastructure
+namespace Leave_Manager_Console.Infrastructure
 {
     internal class InewiDbContext : DbContext
     {

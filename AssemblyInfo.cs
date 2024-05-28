@@ -1,3 +1,3 @@
 ﻿using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Inewi_Console.Tests")]
+[assembly: InternalsVisibleTo("Leave_Manager_Console.Tests")]
