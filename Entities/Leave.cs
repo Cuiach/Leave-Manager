@@ -8,6 +8,8 @@
         public DateTime DateTo { get; set; }
         public bool IsOnDemand { get; set; }
 
+        public Leave()
+        { }
         public Leave(int employeeId, int numberAsId, bool isManuallyCreated)
         {
             Id = numberAsId;
