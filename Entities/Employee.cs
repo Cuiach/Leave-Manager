@@ -1,10 +1,12 @@
-﻿namespace Leave_Manager_Console.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Leave_Manager_Console.Entities
 {
-    public class Employee(string firstName, string lastName, int id)
+    public class Employee
     {
-        public int Id { get; set; } = id;
-        public string FirstName { get; set; } = firstName;
-        public string LastName { get; set; } = lastName;
+        public int Id { get; set; }// = id;
+        public string FirstName { get; set; }// = firstName;
+        public string LastName { get; set; }// = lastName;
         public DateTime DayOfJoining { get; set; }
         public List<LeaveLimit> LeaveLimits { get; set; } = [];
         public enum YearsToTakeLeave
@@ -17,6 +19,23 @@
         public YearsToTakeLeave HowManyYearsToTakePastLeave = YearsToTakeLeave.OneMore;
         public int LeavesPerYear { get; set; }
         public int OnDemandPerYear { get; set; }
+
+        public Employee()
+        {
+        }
+
+        public Employee(string firstName, string lastName, int id)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+            Id = id;
+        }
+
+        public Employee(string firstName, string lastName)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+        }
 
         internal void AdjustDateOfRecruitmentAndThusLeaveLimits(string newDateOfRecruitmentFromUser)
         {

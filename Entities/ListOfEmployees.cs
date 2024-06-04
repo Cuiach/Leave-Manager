@@ -1,4 +1,6 @@
-﻿namespace Leave_Manager_Console.Entities
+﻿using Leave_Manager_Console.Infrastructure;
+
+namespace Leave_Manager_Console.Entities
 {
     public class ListOfEmployees
     {
@@ -157,6 +159,7 @@
 
                             if (IsLeaveLimitPolicySatisfied(employee, 0))
                             {
+                                EditEmployeeLastPart(employee);
                                 Console.WriteLine("Accrued leave cap set to: current year only.");
                             }
                             else
@@ -172,6 +175,7 @@
 
                             if (IsLeaveLimitPolicySatisfied(employee, 0))
                             {
+                                EditEmployeeLastPart(employee);
                                 Console.WriteLine("Accrued leave cap set to: 1 more past year.");
                             }
                             else
@@ -187,6 +191,7 @@
 
                             if (IsLeaveLimitPolicySatisfied(employee, 0))
                             {
+                                EditEmployeeLastPart(employee);
                                 Console.WriteLine("Accrued leave cap set to: 2 more past years.");
                             }
                             else
@@ -199,6 +204,7 @@
 
                         case "3":
                             employee.HowManyYearsToTakePastLeave = Employee.YearsToTakeLeave.NoLimit;
+                            EditEmployeeLastPart(employee);
                             Console.WriteLine("Accrued leave cap set to: no limit.");
                             break;
 
@@ -219,6 +225,10 @@
                 {
                     Console.WriteLine($"An error occurred: {ex.Message}");
                 }
+            }
+            else
+            {
+                EditEmployeeLastPart(employee);
             }
         }
 
@@ -310,6 +320,56 @@
             }
         }
 
+        private void AddEmployeeLastPart(Employee newEmployee)
+        {
+            int newEmployeeId;
+            using (var context = new LMCDbContext())
+            {
+                var employee = new Employee
+                {
+                    FirstName = newEmployee.FirstName,
+                    LastName = newEmployee.LastName,
+                    DayOfJoining = newEmployee.DayOfJoining,
+                    LeavesPerYear = newEmployee.LeavesPerYear,
+                    OnDemandPerYear = newEmployee.OnDemandPerYear,
+                    HowManyYearsToTakePastLeave = newEmployee.HowManyYearsToTakePastLeave
+                };
+                context.Employees.Add(employee);
+                context.SaveChanges();
+                newEmployeeId = employee.Id;
+            }
+            newEmployee.Id = newEmployeeId;
+            Employees.Add(newEmployee);
+            DisplayEmployeeDetails(newEmployee, 0, 0);
+            Console.WriteLine("Day of joining of employee is set to today. If you want to change it go to edit settings");
+        }
+
+        private void EditEmployeeLastPart(Employee oldEmployeeChanged)
+        {
+            using (var context = new LMCDbContext())
+            {
+                var existingEmployee = context.Employees.Find(oldEmployeeChanged.Id);
+
+                if (existingEmployee != null)
+                {
+                    existingEmployee.FirstName = oldEmployeeChanged.FirstName;
+                    existingEmployee.LastName = oldEmployeeChanged.LastName;
+                    existingEmployee.DayOfJoining = oldEmployeeChanged.DayOfJoining;
+                    existingEmployee.LeavesPerYear = oldEmployeeChanged.LeavesPerYear;
+                    existingEmployee.OnDemandPerYear = oldEmployeeChanged.OnDemandPerYear;
+                    existingEmployee.HowManyYearsToTakePastLeave = oldEmployeeChanged.HowManyYearsToTakePastLeave;
+
+                    context.SaveChanges();
+                }
+                else
+                {
+                    Console.WriteLine("Database record (employee) not found.");
+                }
+            }
+
+            Console.WriteLine("Employee's details are changed");
+        }
+
         public void AddEmployee()
         {
             int defaultOnDemand = 4;
@@ -321,9 +381,10 @@
 
             if (firstName != null && lastName != null)
             {
-                int newEmployeeId = Employees.Count == 0 ? 1 : Employees.LastOrDefault().Id + 1;
+                //int newEmployeeId = Employees.Count == 0 ? 1 : Employees.LastOrDefault().Id + 1;
 
-                var newEmployee = new Employee(firstName, lastName, newEmployeeId);
+                //var newEmployee = new Employee(firstName, lastName, newEmployeeId);
+                var newEmployee = new Employee(firstName, lastName);
 
                 Console.WriteLine($"On Demand for the employee per year - is it {defaultOnDemand}? If yes press enter; if not put correct number and enter");
                 newEmployee.OnDemandPerYear = AuxiliaryMethods.SetNewLimit(Console.ReadLine(), defaultOnDemand);
@@ -334,9 +395,10 @@
 
                 newEmployee.DayOfJoining = DateTime.Today;
 
-                Employees.Add(newEmployee);
-                DisplayEmployeeDetails(newEmployee, 0, 0);
-                Console.WriteLine("Day of joining of employee is set to today. If you want to change it go to edit settings");
+                AddEmployeeLastPart(newEmployee);
+                //Employees.Add(newEmployee);
+                //DisplayEmployeeDetails(newEmployee, 0, 0);
+                //Console.WriteLine("Day of joining of employee is set to today. If you want to change it go to edit settings");
             }
         }
 
