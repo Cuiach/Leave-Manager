@@ -4,13 +4,16 @@ namespace Leave_Manager_Console.Entities
 {
     public class ListOfEmployees
     {
+        public List<Employee> Employees { get; set; } = [];
+        private HistoryOfLeaves allLeavesInStorage;
+        
         public ListOfEmployees()
         {
             HistoryOfLeaves allLeavesInStorage = new();
             this.allLeavesInStorage = allLeavesInStorage;
+
+            Employees = GetAllEmployees();
         }
-        public List<Employee> Employees { get; set; } = [];
-        private HistoryOfLeaves allLeavesInStorage;
 
 //employee-related methods
         private bool EmployeeExists(int employeeId)
@@ -368,6 +371,28 @@ namespace Leave_Manager_Console.Entities
             }
 
             Console.WriteLine("Employee's details are changed");
+        }
+
+        private 
+            List<Employee> GetAllEmployees()
+        {
+            using (var context = new LMCDbContext())
+            {
+                var allEmployees = context.Employees.ToList();
+
+                if (allEmployees.Any())
+                {
+                    foreach (var employee in allEmployees)
+                    {
+                        Console.WriteLine($"Employee's name: {employee.FirstName} {employee.LastName}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No employees found.");
+                }
+                return allEmployees;
+            }
         }
 
         public void AddEmployee()
