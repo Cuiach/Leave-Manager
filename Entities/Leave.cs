@@ -10,6 +10,7 @@
 
         public Leave()
         { }
+
         public Leave(int employeeId, int numberAsId, bool isManuallyCreated)
         {
             Id = numberAsId;

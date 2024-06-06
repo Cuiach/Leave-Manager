@@ -761,6 +761,15 @@ namespace Leave_Manager_Console.Entities
 
         }
 
+        private void RemoveLeaveLastPart(Leave leave)
+        {
+            using (var context = new LMCDbContext())
+            {
+                context.Leaves.Remove(leave);
+                context.SaveChanges();
+            }
+        }
+
         public void AddLeave(int employeeId)
         {
             if (!EmployeeExists(employeeId))
@@ -869,9 +878,18 @@ namespace Leave_Manager_Console.Entities
             allLeavesInStorage.DisplayAllLeavesForEmployeeOnDemand(employeeId);
         }
 
-        public void RemoveLeave(int intOfLeaveToRemove)
+        public void RemoveLeave(int leaveIdToRemove)
         {
-            allLeavesInStorage.RemoveLeave(intOfLeaveToRemove);
+            Leave leave = allLeavesInStorage.Leaves.FirstOrDefault(l => l.Id == leaveIdToRemove);
+
+            if (leaveIdToRemove == null)
+            {
+                Console.WriteLine("Leave not found");
+                return;
+            }
+
+            allLeavesInStorage.RemoveLeave(leaveIdToRemove);
+            RemoveLeaveLastPart(leave);
         }
 
         public void EditLeave(int intOfLeaveToEdit)
