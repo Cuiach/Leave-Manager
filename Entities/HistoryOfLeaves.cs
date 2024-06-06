@@ -6,6 +6,29 @@ namespace Leave_Manager_Console.Entities
     {
         public List<Leave> Leaves { get; set; } = [];
 
+        public HistoryOfLeaves() 
+        {
+            Leaves = GetAllLeaves();
+        }
+
+        private List<Leave> GetAllLeaves()
+        {
+            using (var context = new LMCDbContext())
+            {
+                var allLeaves = context.Leaves.ToList();
+
+                if (allLeaves.Any())
+                {
+                    Console.WriteLine($"Leaves are transferred from database.");
+                }
+                else
+                {
+                    Console.WriteLine("No leaves were found in database.");
+                }
+                return allLeaves;
+            }
+        }
+
         private void AddLeaveLastPart(Leave leave)
         {
             Leave leaveHere;
@@ -114,6 +137,19 @@ namespace Leave_Manager_Console.Entities
             AddLeaveLastPart(leave);
         }
 
+        public void RemoveLeave(int intOfLeaveToRemove)
+        {
+            var leaveToRemove = Leaves.FirstOrDefault(c => c.Id == intOfLeaveToRemove);
+            if (leaveToRemove == null)
+            {
+                Console.WriteLine("Leave not found");
+            }
+            else
+            {
+                RemoveLeaveLastPart(leaveToRemove);
+            }
+        }
+
         public void DisplayAllLeaves()
         {
             AuxiliaryMethods.DisplayLeaves(Leaves);
@@ -137,19 +173,6 @@ namespace Leave_Manager_Console.Entities
                 (l => l.EmployeeId == employeeId).Where
                 (l => l.IsOnDemand).ToList();
             AuxiliaryMethods.DisplayLeaves((List<Leave>)leavesOfEmployeeOnDemand);
-        }
-
-        public void RemoveLeave(int intOfLeaveToRemove)
-        {
-            var leaveToRemove = Leaves.FirstOrDefault(c => c.Id == intOfLeaveToRemove);
-            if (leaveToRemove == null)
-            {
-                Console.WriteLine("Leave not found");
-            }
-            else
-            {
-                RemoveLeaveLastPart(leaveToRemove);
-            }
         }
 
         public int GetSumOfDaysOnLeaveTakenByEmployeeInYear(int employeeId, int year)

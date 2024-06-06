@@ -4,6 +4,9 @@ namespace Leave_Manager_Console.Entities
 {
     public class ListOfEmployees
     {
+        public List<Employee> Employees { get; set; } = [];
+        private HistoryOfLeaves allLeavesInStorage;
+
         public ListOfEmployees()
         {
             HistoryOfLeaves allLeavesInStorage = new();
@@ -11,8 +14,6 @@ namespace Leave_Manager_Console.Entities
 
             Employees = GetAllEmployees();
         }
-        public List<Employee> Employees { get; set; } = [];
-        private HistoryOfLeaves allLeavesInStorage;
 
         //employee-related methods
         private List<Employee> GetAllEmployees()
@@ -35,6 +36,7 @@ namespace Leave_Manager_Console.Entities
                 return allEmployees;
             }
         }
+
         private bool EmployeeExists(int employeeId)
         {
             Employee employee = Employees.FirstOrDefault(e => e.Id == employeeId);
