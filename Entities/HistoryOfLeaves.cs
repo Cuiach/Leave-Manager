@@ -1,8 +1,42 @@
-﻿namespace Leave_Manager_Console.Entities
+﻿using Leave_Manager_Console.Infrastructure;
+
+namespace Leave_Manager_Console.Entities
 {
     public class HistoryOfLeaves
     {
         public List<Leave> Leaves { get; set; } = [];
+
+        private void AddLeaveLastPart(Leave leave)
+        {
+            Leave leaveHere;
+            int newLeaveId;
+            using (var context = new LMCDbContext())
+            {
+                leaveHere = new Leave()
+                {
+                    EmployeeId = leave.EmployeeId,
+                    DateFrom = leave.DateFrom,
+                    DateTo = leave.DateTo,
+                    IsOnDemand = leave.IsOnDemand
+                };
+                context.Leaves.Add(leaveHere);
+                context.SaveChanges();
+                newLeaveId = leaveHere.Id;
+            }
+            leave.Id = newLeaveId;
+            Leaves.Add(leave);
+        }
+
+        private void RemoveLeaveLastPart(Leave leave)
+        {
+            using (var context = new LMCDbContext())
+            {
+                context.Leaves.Remove(leave);
+                context.SaveChanges();
+            }
+
+            Leaves.Remove(leave);
+        }
 
         internal void SplitLeaveIntoConsecutiveBusinessDaysBits(Leave leave)
         {
@@ -18,12 +52,12 @@
             int i = 0;
             foreach (var uninterruptedRange in listOfLeaves)
             {
-                Leave leaveHere = new(employeeeId, leaveId + i, false);
+                Leave leaveHere = new(employeeeId, false);
                 leaveHere.IsOnDemand = isOnDemand;
                 leaveHere.DateFrom = uninterruptedRange.First();
                 leaveHere.DateTo = uninterruptedRange.Last();
 
-                Leaves.Add(leaveHere);
+                AddLeaveLastPart(leaveHere);
                 i++;
             }
         }
@@ -77,7 +111,7 @@
                 bool _ = (input == "y") ? (leave.IsOnDemand = true) : ((input == "n") ? leave.IsOnDemand = false : true);
             }
 
-            Leaves.Add(leave);
+            AddLeaveLastPart(leave);
         }
 
         public void DisplayAllLeaves()
@@ -114,7 +148,7 @@
             }
             else
             {
-                Leaves.Remove(leaveToRemove);
+                RemoveLeaveLastPart(leaveToRemove);
             }
         }
 

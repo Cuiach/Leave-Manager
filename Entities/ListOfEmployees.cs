@@ -743,33 +743,6 @@ namespace Leave_Manager_Console.Entities
             return true;
         }
 
-        private void AddLeaveLastPart(Leave leave)
-        {
-            Leave leaveHere;
-            using (var context = new LMCDbContext())
-            {
-                leaveHere = new Leave
-                {
-                    EmployeeId = leave.EmployeeId,
-                    DateFrom = leave.DateFrom,
-                    DateTo = leave.DateTo,
-                    IsOnDemand = leave.IsOnDemand
-                };
-                context.Leaves.Add(leaveHere);
-                context.SaveChanges();
-            }
-
-        }
-
-        private void RemoveLeaveLastPart(Leave leave)
-        {
-            using (var context = new LMCDbContext())
-            {
-                context.Leaves.Remove(leave);
-                context.SaveChanges();
-            }
-        }
-
         public void AddLeave(int employeeId)
         {
             if (!EmployeeExists(employeeId))
@@ -812,10 +785,6 @@ namespace Leave_Manager_Console.Entities
                     }
                     Console.WriteLine("Leave is not added. Leave limit policy is violated.");
                 }
-                else
-                {
-                    AddLeaveLastPart(leave);
-                }
             }
             else
             {
@@ -851,10 +820,6 @@ namespace Leave_Manager_Console.Entities
                     }
                     Console.WriteLine("Leave is not added. Leave limit policy is violated.");
                 }
-                else
-                {
-                    AddLeaveLastPart(leave);
-                }
             }
         }
 
@@ -889,7 +854,6 @@ namespace Leave_Manager_Console.Entities
             }
 
             allLeavesInStorage.RemoveLeave(leaveIdToRemove);
-            RemoveLeaveLastPart(leave);
         }
 
         public void EditLeave(int intOfLeaveToEdit)
