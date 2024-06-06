@@ -4,6 +4,7 @@ using Leave_Manager_Console.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Leave_Manager_Console.Migrations
 {
     [DbContext(typeof(LMCDbContext))]
-    partial class LMCDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240606102700_LeaveLimit_Corrected")]
+    partial class LeaveLimit_Corrected
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -100,7 +103,7 @@ namespace Leave_Manager_Console.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("LeaveLimits");
+                    b.ToTable("LeaveLimit");
                 });
 
             modelBuilder.Entity("Leave_Manager_Console.Entities.Leave", b =>
@@ -114,15 +117,9 @@ namespace Leave_Manager_Console.Migrations
 
             modelBuilder.Entity("Leave_Manager_Console.Entities.LeaveLimit", b =>
                 {
-                    b.HasOne("Leave_Manager_Console.Entities.Employee", null)
-                        .WithMany()
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Leave_Manager_Console.Entities.Employee", "Employee")
                         .WithMany("LeaveLimits")
-                        .HasForeignKey("EmployeeId1")
+                        .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -6,7 +6,7 @@ namespace Leave_Manager_Console.Entities
     {
         public List<Employee> Employees { get; set; } = [];
         private HistoryOfLeaves allLeavesInStorage;
-        
+
         public ListOfEmployees()
         {
             HistoryOfLeaves allLeavesInStorage = new();
@@ -15,7 +15,33 @@ namespace Leave_Manager_Console.Entities
             Employees = GetAllEmployees();
         }
 
-//employee-related methods
+        //employee-related methods
+        private List<Employee> GetAllEmployees()
+        {
+            using (var context = new LMCDbContext())
+            {
+                var allEmployees = context.Employees.ToList();
+
+                foreach (var employee in allEmployees)
+                {
+                    employee.LeaveLimits = context.LeaveLimits.Where(l => l.Employee == employee).ToList();
+                }
+
+                if (allEmployees.Any())
+                {
+                    foreach (var employee in allEmployees)
+                    {
+                        Console.WriteLine($"Employee's name: {employee.FirstName} {employee.LastName}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No employees found.");
+                }
+                return allEmployees;
+            }
+        }
+
         private bool EmployeeExists(int employeeId)
         {
             Employee employee = Employees.FirstOrDefault(e => e.Id == employeeId);
@@ -30,6 +56,25 @@ namespace Leave_Manager_Console.Entities
             }
         }
 
+        private bool AddLeaveLimitLastPart(Employee employee, LeaveLimit leaveLimit)
+        {
+            using (var context = new LMCDbContext())
+            {
+                var employeeToUpdate = context.Employees.Find(employee.Id);
+                if (employeeToUpdate != null)
+                {
+                    employeeToUpdate.LeaveLimits.Add(leaveLimit);
+                    context.SaveChanges();
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine("Employee not found in database.");
+                    return false;
+                }
+            }
+        }
+
         private void PropagateLeaveLimitsForCurrentYearForAllEmployees()
         {
             int thisYear = DateTime.Today.Year;
@@ -39,7 +84,10 @@ namespace Leave_Manager_Console.Entities
                 if (leaveLimit == null)
                 {
                     LeaveLimit newLeaveLimit = new(thisYear, employee.LeavesPerYear);
-                    employee.LeaveLimits.Add(newLeaveLimit);
+                    if (AddLeaveLimitLastPart(employee, newLeaveLimit))
+                    {
+                        employee.LeaveLimits.Add(newLeaveLimit);
+                    }
                 }
             }
         }
@@ -52,7 +100,10 @@ namespace Leave_Manager_Console.Entities
                 var limitForYear = employee.LeaveLimits.Where(l => l.Year == i).FirstOrDefault();
                 if (limitForYear == null)
                 {
-                    employee.LeaveLimits.Add(newLimit);
+                    if (AddLeaveLimitLastPart(employee, newLimit))
+                    {
+                        employee.LeaveLimits.Add(newLimit);
+                    }
                 }
             }
         }
@@ -251,7 +302,10 @@ namespace Leave_Manager_Console.Entities
                 if (leaveLimit == null)
                 {
                     leaveLimit = new(i, employee.LeavesPerYear);
-                    employee.LeaveLimits.Add(leaveLimit);
+                    if (AddLeaveLimitLastPart(employee, leaveLimit))
+                    {
+                        employee.LeaveLimits.Add(leaveLimit);
+                    }
 
                     Console.WriteLine($"Year: {i}, limit: {leaveLimit.Limit}");
                     Console.WriteLine("Do you want to change the limit? Press y if yes");
@@ -373,28 +427,6 @@ namespace Leave_Manager_Console.Entities
             Console.WriteLine("Employee's details are changed");
         }
 
-        private 
-            List<Employee> GetAllEmployees()
-        {
-            using (var context = new LMCDbContext())
-            {
-                var allEmployees = context.Employees.ToList();
-
-                if (allEmployees.Any())
-                {
-                    foreach (var employee in allEmployees)
-                    {
-                        Console.WriteLine($"Employee's name: {employee.FirstName} {employee.LastName}");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("No employees found.");
-                }
-                return allEmployees;
-            }
-        }
-
         public void AddEmployee()
         {
             int defaultOnDemand = 4;
@@ -441,6 +473,11 @@ namespace Leave_Manager_Console.Entities
             else
             {
                 var employeeToRemove = Employees.First(c => c.Id == employeeId);
+                using (var context = new LMCDbContext())
+                {
+                    context.Employees.Remove(employeeToRemove);
+                    context.SaveChanges();
+                }
                 Employees.Remove(employeeToRemove);
             }
         }
@@ -841,9 +878,17 @@ namespace Leave_Manager_Console.Entities
             allLeavesInStorage.DisplayAllLeavesForEmployeeOnDemand(employeeId);
         }
 
-        public void RemoveLeave(int intOfLeaveToRemove)
+        public void RemoveLeave(int leaveIdToRemove)
         {
-            allLeavesInStorage.RemoveLeave(intOfLeaveToRemove);
+            Leave leave = allLeavesInStorage.Leaves.FirstOrDefault(l => l.Id == leaveIdToRemove);
+
+            if (leaveIdToRemove == null)
+            {
+                Console.WriteLine("Leave not found");
+                return;
+            }
+
+            allLeavesInStorage.RemoveLeave(leaveIdToRemove);
         }
 
         public void EditLeave(int intOfLeaveToEdit)

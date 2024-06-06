@@ -10,6 +10,21 @@
 
         public Leave()
         { }
+
+        public Leave(int employeeId, bool isManuallyCreated)
+        {
+            EmployeeId = employeeId;
+
+            if (isManuallyCreated)
+            {
+                DateFrom = DateTime.Today.Date.AddDays(-6);
+                DateTo = DateTime.Today.Date;
+                IsOnDemand = false;
+            }
+            else
+            { }
+        }
+
         public Leave(int employeeId, int numberAsId, bool isManuallyCreated)
         {
             Id = numberAsId;
