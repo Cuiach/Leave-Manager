@@ -8,11 +8,33 @@ namespace Leave_Manager_Console.Entities
         {
             HistoryOfLeaves allLeavesInStorage = new();
             this.allLeavesInStorage = allLeavesInStorage;
+
+            Employees = GetAllEmployees();
         }
         public List<Employee> Employees { get; set; } = [];
         private HistoryOfLeaves allLeavesInStorage;
 
-//employee-related methods
+        //employee-related methods
+        private List<Employee> GetAllEmployees()
+        {
+            using (var context = new LMCDbContext())
+            {
+                var allEmployees = context.Employees.ToList();
+
+                if (allEmployees.Any())
+                {
+                    foreach (var employee in allEmployees)
+                    {
+                        Console.WriteLine($"Employee's name: {employee.FirstName} {employee.LastName}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No employees found.");
+                }
+                return allEmployees;
+            }
+        }
         private bool EmployeeExists(int employeeId)
         {
             Employee employee = Employees.FirstOrDefault(e => e.Id == employeeId);
@@ -416,6 +438,11 @@ namespace Leave_Manager_Console.Entities
             else
             {
                 var employeeToRemove = Employees.First(c => c.Id == employeeId);
+                using (var context = new LMCDbContext())
+                {
+                    context.Employees.Remove(employeeToRemove);
+                    context.SaveChanges();
+                }
                 Employees.Remove(employeeToRemove);
             }
         }
