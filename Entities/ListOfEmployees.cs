@@ -22,6 +22,11 @@ namespace Leave_Manager_Console.Entities
             {
                 var allEmployees = context.Employees.ToList();
 
+                foreach (var employee in allEmployees)
+                {
+                    employee.LeaveLimits = context.LeaveLimits.Where(l => l.Employee == employee).ToList();
+                }
+
                 if (allEmployees.Any())
                 {
                     foreach (var employee in allEmployees)
@@ -51,6 +56,25 @@ namespace Leave_Manager_Console.Entities
             }
         }
 
+        private bool AddLeaveLimitLastPart(Employee employee, LeaveLimit leaveLimit)
+        {
+            using (var context = new LMCDbContext())
+            {
+                var employeeToUpdate = context.Employees.Find(employee.Id);
+                if (employeeToUpdate != null)
+                {
+                    employeeToUpdate.LeaveLimits.Add(leaveLimit);
+                    context.SaveChanges();
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine("Employee not found in database.");
+                    return false;
+                }
+            }
+        }
+
         private void PropagateLeaveLimitsForCurrentYearForAllEmployees()
         {
             int thisYear = DateTime.Today.Year;
@@ -60,7 +84,10 @@ namespace Leave_Manager_Console.Entities
                 if (leaveLimit == null)
                 {
                     LeaveLimit newLeaveLimit = new(thisYear, employee.LeavesPerYear);
-                    employee.LeaveLimits.Add(newLeaveLimit);
+                    if (AddLeaveLimitLastPart(employee, newLeaveLimit))
+                    {
+                        employee.LeaveLimits.Add(newLeaveLimit);
+                    }
                 }
             }
         }
@@ -73,7 +100,10 @@ namespace Leave_Manager_Console.Entities
                 var limitForYear = employee.LeaveLimits.Where(l => l.Year == i).FirstOrDefault();
                 if (limitForYear == null)
                 {
-                    employee.LeaveLimits.Add(newLimit);
+                    if (AddLeaveLimitLastPart(employee, newLimit))
+                    {
+                        employee.LeaveLimits.Add(newLimit);
+                    }
                 }
             }
         }
@@ -272,7 +302,10 @@ namespace Leave_Manager_Console.Entities
                 if (leaveLimit == null)
                 {
                     leaveLimit = new(i, employee.LeavesPerYear);
-                    employee.LeaveLimits.Add(leaveLimit);
+                    if (AddLeaveLimitLastPart(employee, leaveLimit))
+                    {
+                        employee.LeaveLimits.Add(leaveLimit);
+                    }
 
                     Console.WriteLine($"Year: {i}, limit: {leaveLimit.Limit}");
                     Console.WriteLine("Do you want to change the limit? Press y if yes");
