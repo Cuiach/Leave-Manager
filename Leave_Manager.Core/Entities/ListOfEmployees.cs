@@ -1,6 +1,6 @@
-﻿using Leave_Manager_Console.Infrastructure;
+﻿using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
 
-namespace Leave_Manager_Console.Entities
+namespace Leave_Manager.Leave_Manager.Core.Entities
 {
     public class ListOfEmployees
     {
@@ -18,7 +18,7 @@ namespace Leave_Manager_Console.Entities
         //employee-related methods
         private List<Employee> GetAllEmployees()
         {
-            using (var context = new LMCDbContext())
+            using (var context = new LMDbContext())
             {
                 var allEmployees = context.Employees.ToList();
 
@@ -58,7 +58,7 @@ namespace Leave_Manager_Console.Entities
 
         private bool AddLeaveLimitLastPart(Employee employee, LeaveLimit leaveLimit)
         {
-            using (var context = new LMCDbContext())
+            using (var context = new LMDbContext())
             {
                 var employeeToUpdate = context.Employees.Find(employee.Id);
                 if (employeeToUpdate != null)
@@ -380,7 +380,7 @@ namespace Leave_Manager_Console.Entities
         private void AddEmployeeLastPart(Employee newEmployee)
         {
             int newEmployeeId;
-            using (var context = new LMCDbContext())
+            using (var context = new LMDbContext())
             {
                 var employee = new Employee
                 {
@@ -403,7 +403,7 @@ namespace Leave_Manager_Console.Entities
 
         private void EditEmployeeLastPart(Employee oldEmployeeChanged)
         {
-            using (var context = new LMCDbContext())
+            using (var context = new LMDbContext())
             {
                 var existingEmployee = context.Employees.Find(oldEmployeeChanged.Id);
 
@@ -473,7 +473,7 @@ namespace Leave_Manager_Console.Entities
             else
             {
                 var employeeToRemove = Employees.First(c => c.Id == employeeId);
-                using (var context = new LMCDbContext())
+                using (var context = new LMDbContext())
                 {
                     context.Employees.Remove(employeeToRemove);
                     context.SaveChanges();
@@ -571,10 +571,10 @@ namespace Leave_Manager_Console.Entities
             ChangeAccruedLeaveLimitPolicy(employee);
         }
 
-//leave-related methods
+        //leave-related methods
         private bool IsLeaveLimitPolicySatisfied(Employee employee, int yearOfLeaveEnd)
         {
-            int yearToWhichCheckPolicy = (yearOfLeaveEnd > DateTime.Now.Year) ? yearOfLeaveEnd : DateTime.Now.Year;
+            int yearToWhichCheckPolicy = yearOfLeaveEnd > DateTime.Now.Year ? yearOfLeaveEnd : DateTime.Now.Year;
 
             for (int i = employee.DayOfJoining.Year; i <= yearToWhichCheckPolicy; i++)
             {
@@ -624,7 +624,7 @@ namespace Leave_Manager_Console.Entities
 
             if (employee.DayOfJoining.Year != k)
             {
-                return Math.Min(leaveLimitInYearK.Limit, (leaveLimitInYearK.Limit - sumOfLeavesInYearK + ExcessLeaveFromPastYearOneMore(employee, k - 1)));
+                return Math.Min(leaveLimitInYearK.Limit, leaveLimitInYearK.Limit - sumOfLeavesInYearK + ExcessLeaveFromPastYearOneMore(employee, k - 1));
             }
             else
             {
@@ -639,11 +639,11 @@ namespace Leave_Manager_Console.Entities
 
             if (employee.DayOfJoining.Year == k)
             {
-                return (leaveLimitInYearK.Limit - sumOfLeavesInYearK);
+                return leaveLimitInYearK.Limit - sumOfLeavesInYearK;
             }
             else if (employee.DayOfJoining.Year == k - 1)
             {
-                return (leaveLimitInYearK.Limit - sumOfLeavesInYearK + ExcessLeaveFromPastYearTwoMore(employee, k - 1));
+                return leaveLimitInYearK.Limit - sumOfLeavesInYearK + ExcessLeaveFromPastYearTwoMore(employee, k - 1);
             }
             else
             {
@@ -725,9 +725,9 @@ namespace Leave_Manager_Console.Entities
 
         private bool GetNewDatesOfLeave(Leave leave, Employee employee, bool totallyNewLeave)
         {
-            Console.WriteLine((totallyNewLeave == true) ? $"Default leave dates: from {leave.DateFrom}, to {leave.DateTo}. Put n if you want to set the dates manually" : "");
+            Console.WriteLine(totallyNewLeave == true ? $"Default leave dates: from {leave.DateFrom}, to {leave.DateTo}. Put n if you want to set the dates manually" : "");
 
-            if (totallyNewLeave == false || (totallyNewLeave == true && Console.ReadLine() == "n"))
+            if (totallyNewLeave == false || totallyNewLeave == true && Console.ReadLine() == "n")
             {
                 Console.WriteLine("Put date of beginning of leave (or put any letter to skip)");
                 if (DateTime.TryParseExact(Console.ReadLine(), "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out DateTime userDateTimeFrom))
@@ -737,7 +737,7 @@ namespace Leave_Manager_Console.Entities
                 }
                 else
                 {
-                    Console.WriteLine((totallyNewLeave == true) ? "You entered an incorrect value." : "Beginning of leave is not changed.");
+                    Console.WriteLine(totallyNewLeave == true ? "You entered an incorrect value." : "Beginning of leave is not changed.");
                 }
 
                 Console.WriteLine("Put date of end of leave (or put any letter to skip)");

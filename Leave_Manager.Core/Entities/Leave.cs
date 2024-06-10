@@ -1,4 +1,4 @@
-﻿namespace Leave_Manager_Console.Entities
+﻿namespace Leave_Manager.Leave_Manager.Core.Entities
 {
     public class Leave
     {
@@ -37,7 +37,7 @@
                 IsOnDemand = false;
             }
             else
-            {}
+            { }
         }
 
         internal static void DisplayLeaveDetails(Leave leave)
@@ -54,12 +54,12 @@
             WorkDaysCalculator workDaysCalculator = new();
             return workDaysCalculator.CountWorkDaysBetweenDates(DateFrom, DateTo);
         }
- 
+
         internal int HowManyCalendarYearsLeaveSpans()
         {
             int yearFrom = DateFrom.Year;
             int yearTo = DateTo.Year;
-                return yearFrom - yearTo + 1;
+            return yearFrom - yearTo + 1;
         }
 
         internal int GetWorkDaysOfLeave()

@@ -1,5 +1,5 @@
-﻿using Leave_Manager_Console.Entities;
-using Leave_Manager_Console.Presentation;
+﻿using Leave_Manager.Leave_Manager.ConsoleApp.Presentation;
+using Leave_Manager.Leave_Manager.Core.Entities;
 
 Console.WriteLine("--- Leave management app ---");
 

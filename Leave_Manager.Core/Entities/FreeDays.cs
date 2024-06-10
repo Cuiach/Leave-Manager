@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Leave_Manager_Console.Entities
+namespace Leave_Manager.Leave_Manager.Core.Entities
 {
     internal class FreeDays
     {
@@ -69,7 +69,7 @@ namespace Leave_Manager_Console.Entities
         {
             Dictionary<DateTime, string> freeDaysOfYear = new();
 
-            foreach (KeyValuePair<DateTime, string>  freeDay in immovableFreeDays)
+            foreach (KeyValuePair<DateTime, string> freeDay in immovableFreeDays)
             {
                 DateTime newDay = new DateTime(year, freeDay.Key.Month, freeDay.Key.Day);
                 freeDaysOfYear[newDay] = freeDay.Value;
@@ -82,10 +82,10 @@ namespace Leave_Manager_Console.Entities
                 easter = easterInParticularYears[year];
                 AddMovableFeastsToDictionary(easter, freeDaysOfYear);
             }
-            
+
             return freeDaysOfYear;
         }
 
-        
+
     }
 }

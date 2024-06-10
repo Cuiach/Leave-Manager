@@ -1,19 +1,19 @@
-﻿using Leave_Manager_Console.Infrastructure;
+﻿using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
 
-namespace Leave_Manager_Console.Entities
+namespace Leave_Manager.Leave_Manager.Core.Entities
 {
     public class HistoryOfLeaves
     {
         public List<Leave> Leaves { get; set; } = [];
 
-        public HistoryOfLeaves() 
+        public HistoryOfLeaves()
         {
             Leaves = GetAllLeaves();
         }
 
         private List<Leave> GetAllLeaves()
         {
-            using (var context = new LMCDbContext())
+            using (var context = new LMDbContext())
             {
                 var allLeaves = context.Leaves.ToList();
 
@@ -33,7 +33,7 @@ namespace Leave_Manager_Console.Entities
         {
             Leave leaveHere;
             int newLeaveId;
-            using (var context = new LMCDbContext())
+            using (var context = new LMDbContext())
             {
                 leaveHere = new Leave()
                 {
@@ -52,7 +52,7 @@ namespace Leave_Manager_Console.Entities
 
         private void RemoveLeaveLastPart(Leave leave)
         {
-            using (var context = new LMCDbContext())
+            using (var context = new LMDbContext())
             {
                 context.Leaves.Remove(leave);
                 context.SaveChanges();
@@ -131,7 +131,7 @@ namespace Leave_Manager_Console.Entities
 
                 string input = Console.ReadLine();
 
-                bool _ = (input == "y") ? (leave.IsOnDemand = true) : ((input == "n") ? leave.IsOnDemand = false : true);
+                bool _ = input == "y" ? (leave.IsOnDemand = true) : input == "n" ? leave.IsOnDemand = false : true;
             }
 
             AddLeaveLastPart(leave);
@@ -158,13 +158,13 @@ namespace Leave_Manager_Console.Entities
         public void DisplayAllLeavesOnDemand()
         {
             var onDemandLeaves = Leaves.Where(l => l.IsOnDemand).ToList();
-            AuxiliaryMethods.DisplayLeaves((List<Leave>)onDemandLeaves);
+            AuxiliaryMethods.DisplayLeaves(onDemandLeaves);
         }
 
         public void DisplayAllLeavesForEmployee(int employeeId)
         {
             var leavesOfEmployee = Leaves.Where(l => l.EmployeeId == employeeId).ToList();
-            AuxiliaryMethods.DisplayLeaves((List<Leave>)leavesOfEmployee);
+            AuxiliaryMethods.DisplayLeaves(leavesOfEmployee);
         }
 
         public void DisplayAllLeavesForEmployeeOnDemand(int employeeId)
@@ -172,7 +172,7 @@ namespace Leave_Manager_Console.Entities
             var leavesOfEmployeeOnDemand = Leaves.Where
                 (l => l.EmployeeId == employeeId).Where
                 (l => l.IsOnDemand).ToList();
-            AuxiliaryMethods.DisplayLeaves((List<Leave>)leavesOfEmployeeOnDemand);
+            AuxiliaryMethods.DisplayLeaves(leavesOfEmployeeOnDemand);
         }
 
         public int GetSumOfDaysOnLeaveTakenByEmployeeInYear(int employeeId, int year)

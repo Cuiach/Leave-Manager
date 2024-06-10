@@ -1,4 +1,4 @@
-﻿namespace Leave_Manager_Console.Entities
+﻿namespace Leave_Manager.Leave_Manager.Core.Entities
 {
     public class LeaveLimit
     {
@@ -8,8 +8,8 @@
         public Employee Employee { get; set; }
         public LeaveLimit(int year, int limit)
         {
-            this.Year = year;
-            this.Limit = limit;
+            Year = year;
+            Limit = limit;
         }
         public LeaveLimit()
         {

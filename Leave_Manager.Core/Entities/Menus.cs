@@ -1,4 +1,4 @@
-﻿namespace Leave_Manager_Console.Entities
+﻿namespace Leave_Manager.Leave_Manager.Core.Entities
 {
     internal class Menus
     {

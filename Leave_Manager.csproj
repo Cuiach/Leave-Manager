@@ -21,4 +21,8 @@
     <PackageReference Include="xunit.extensibility.core" Version="2.8.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Leave_Manager.Core\Interfaces\" />
+  </ItemGroup>
+
 </Project>

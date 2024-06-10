@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Leave_Manager_Console.Entities
+namespace Leave_Manager.Leave_Manager.Core.Entities
 {
     internal class AuxiliaryMethods
     {
@@ -18,10 +18,10 @@ namespace Leave_Manager_Console.Entities
             }
         }
 
-        public static int GetId() 
+        public static int GetId()
         {
             Console.WriteLine("insert id");
-            var idAsString = (Console.ReadLine() ?? "0");
+            var idAsString = Console.ReadLine() ?? "0";
             bool _ = int.TryParse(idAsString, out int idOrZero);
             return idOrZero;
         }
