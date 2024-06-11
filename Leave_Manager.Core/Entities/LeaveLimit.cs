@@ -1,4 +1,6 @@
-﻿namespace Leave_Manager.Leave_Manager.Core.Entities
+﻿using Leave_Manager.Leave_Manager.Core.Interfaces;
+
+namespace Leave_Manager.Leave_Manager.Core.Entities
 {
     public class LeaveLimit
     {

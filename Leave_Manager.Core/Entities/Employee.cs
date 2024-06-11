@@ -1,12 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Leave_Manager.Leave_Manager.Core.Interfaces;
 
 namespace Leave_Manager.Leave_Manager.Core.Entities
 {
     public class Employee
     {
-        public int Id { get; set; }// = id;
-        public string FirstName { get; set; }// = firstName;
-        public string LastName { get; set; }// = lastName;
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public DateTime DayOfJoining { get; set; }
         public List<LeaveLimit> LeaveLimits { get; set; } = [];
         public enum YearsToTakeLeave

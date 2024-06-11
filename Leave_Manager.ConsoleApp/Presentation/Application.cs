@@ -1,10 +1,10 @@
-﻿using Leave_Manager.Leave_Manager.Core.Entities;
+﻿using Leave_Manager.Leave_Manager.Core.Services;
 
 namespace Leave_Manager.Leave_Manager.ConsoleApp.Presentation
 {
     public class Application
     {
-        ListOfEmployees listOfEmployees = new();
+        ListOfEmployeesService listOfEmployees = new();
 
         public void AddEmployee()
         {

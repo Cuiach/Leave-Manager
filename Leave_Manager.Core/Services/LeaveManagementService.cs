@@ -1,12 +1,15 @@
-﻿using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
+﻿using Leave_Manager.Application;
+using Leave_Manager.Leave_Manager.Core.Entities;
+using Leave_Manager.Leave_Manager.Core.Interfaces;
+using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
 
-namespace Leave_Manager.Leave_Manager.Core.Entities
+namespace Leave_Manager.Leave_Manager.Core.Services
 {
-    public class HistoryOfLeaves
+    public class LeaveManagementService : ILeaveManagementService
     {
         public List<Leave> Leaves { get; set; } = [];
 
-        public HistoryOfLeaves()
+        public LeaveManagementService()
         {
             Leaves = GetAllLeaves();
         }

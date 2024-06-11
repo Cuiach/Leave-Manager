@@ -1,4 +1,7 @@
-﻿namespace Leave_Manager.Leave_Manager.Core.Entities
+﻿using Leave_Manager.Leave_Manager.Core.Interfaces;
+using Leave_Manager.Leave_Manager.Core.Services;
+
+namespace Leave_Manager.Leave_Manager.Core.Entities
 {
     public class Leave
     {

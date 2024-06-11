@@ -1,15 +1,18 @@
-﻿using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
+﻿using Leave_Manager.Application;
+using Leave_Manager.Leave_Manager.Core.Entities;
+using Leave_Manager.Leave_Manager.Core.Interfaces;
+using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
 
-namespace Leave_Manager.Leave_Manager.Core.Entities
+namespace Leave_Manager.Leave_Manager.Core.Services
 {
-    public class ListOfEmployees
+    public class ListOfEmployeesService : IListOfEmployeesServices
     {
         public List<Employee> Employees { get; set; } = [];
-        private HistoryOfLeaves allLeavesInStorage;
+        private LeaveManagementService allLeavesInStorage;
 
-        public ListOfEmployees()
+        public ListOfEmployeesService()
         {
-            HistoryOfLeaves allLeavesInStorage = new();
+            LeaveManagementService allLeavesInStorage = new();
             this.allLeavesInStorage = allLeavesInStorage;
 
             Employees = GetAllEmployees();

@@ -1,10 +1,9 @@
-﻿// this .cs is not used at the moment; this is only a kind of plan to rewrite code in the future
-
-using Leave_Manager.Leave_Manager.Core.Entities;
+﻿using Leave_Manager.Leave_Manager.Core.Entities;
+using Leave_Manager.Leave_Manager.Core.Interfaces;
 
 namespace Leave_Manager.Leave_Manager.Infrastructure.Persistence
 {
-    internal class EmployeeRepository
+    internal class EmployeeRepository : IEmployeeRepository
     {
         private readonly LMDbContext _context;
 

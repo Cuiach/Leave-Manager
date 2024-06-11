@@ -1,4 +1,6 @@
-﻿namespace Leave_Manager.Leave_Manager.Core.Entities
+﻿using Leave_Manager.Leave_Manager.Core.Entities;
+
+namespace Leave_Manager.Leave_Manager.Core.Services
 {
     public class WorkDaysCalculator
     {
