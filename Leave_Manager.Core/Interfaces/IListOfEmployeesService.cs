@@ -2,9 +2,9 @@
 
 namespace Leave_Manager.Leave_Manager.Core.Interfaces
 {
-    public interface IListOfEmployeesServices
+    public interface IListOfEmployeesService
     {
-        List<Employee> Employees { get; set; }
+        List<Employee> Employees { get; }
 
         void AddEmployee();
         void AddLeave(int employeeId);
@@ -16,6 +16,7 @@ namespace Leave_Manager.Leave_Manager.Core.Interfaces
         void DisplayMatchingEmployees(string searchPhrase);
         void EditLeave(int intOfLeaveToEdit);
         void EditSettings(int employeeIdToEdit);
+        List<Employee> GetAllEmployees();
         void RemoveEmployee(int employeeId);
         void RemoveLeave(int leaveIdToRemove);
     }

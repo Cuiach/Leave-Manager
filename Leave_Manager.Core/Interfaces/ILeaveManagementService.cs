@@ -4,8 +4,7 @@ namespace Leave_Manager.Leave_Manager.Core.Interfaces
 {
     public interface ILeaveManagementService
     {
-        List<Leave> Leaves { get; set; }
-
+        List<Leave> GetAllLeaves();
         void AddLeave(Leave leave, bool askIfOnDemand);
         bool CheckOverlapping(Leave leave);
         int CountSumOfPastYearLeaveDays(int employeeId, int year);

@@ -47,12 +47,21 @@ namespace Leave_Manager.Application
             return newLimit;
         }
 
+        internal static void DisplayLeaveDetails(Leave leave)
+        {
+            string onDemand = "ON DEMAND";
+            string notOnDemand = "NOT On Demand";
+            string dateFrom = leave.DateFrom.ToString("yyyy-MM-dd");
+            string dateTo = leave.DateTo.ToString("yyyy-MM-dd");
+            Console.WriteLine($"Leave details Id={leave.Id}, Employee Id={leave.EmployeeId}, leave from: {dateFrom}, leave to: {dateTo}, {(leave.IsOnDemand ? onDemand : notOnDemand)}");
+        }
+        
         internal static void DisplayLeaves(List<Leave> setOfLeaves)
         {
             List<Leave> orderedLeaves = [.. setOfLeaves.OrderBy(l => l.DateFrom)];
             foreach (var leave in orderedLeaves)
             {
-                Leave.DisplayLeaveDetails(leave);
+                DisplayLeaveDetails(leave);
             }
         }
     }

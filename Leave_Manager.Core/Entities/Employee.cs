@@ -1,6 +1,4 @@
-﻿using Leave_Manager.Leave_Manager.Core.Interfaces;
-
-namespace Leave_Manager.Leave_Manager.Core.Entities
+﻿namespace Leave_Manager.Leave_Manager.Core.Entities
 {
     public class Employee
     {
@@ -42,7 +40,6 @@ namespace Leave_Manager.Leave_Manager.Core.Entities
             int oldYearOfRecruitment = DayOfJoining.Year;
             DateTime newDateOfRecruitment = DateTime.ParseExact(newDateOfRecruitmentFromUser, "yyyy-MM-dd", null);
             DayOfJoining = newDateOfRecruitment;
-            Console.WriteLine($"Date of recruitment is set to: {newDateOfRecruitmentFromUser}");
             for (int i = oldYearOfRecruitment; i < newDateOfRecruitment.Year; i++)
             {
                 LeaveLimit limitToRemove = LeaveLimits.FirstOrDefault(l => l.Year == i);
@@ -64,7 +61,6 @@ namespace Leave_Manager.Leave_Manager.Core.Entities
             {
                 LeaveLimit leavelimit = new(currentYear, LeavesPerYear);
                 LeaveLimits.Add(leavelimit);
-                Console.WriteLine($"Leave per year was set to: {LeavesPerYear}");
             }
             else
             {

@@ -1,5 +1,27 @@
 ﻿using Leave_Manager.Application;
 using Leave_Manager.Leave_Manager.ConsoleApp.Presentation;
+using Leave_Manager.Leave_Manager.Core.Interfaces;
+using Leave_Manager.Leave_Manager.Core.Services;
+using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
+var serviceCollection = new ServiceCollection();
+
+// Register Services (DbContext, Repositories, Services)
+serviceCollection.AddDbContext<LMDbContext>(options =>
+    options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=Leave_Manager_ConsoleDb;Trusted_Connection=True;"));
+
+
+// 1.2. Register Dependencies (Make sure this is here, BEFORE building the service provider)
+serviceCollection.AddScoped<ILeaveManagementService, LeaveManagementService>(); 
+//serviceCollection.AddScoped<IEmployeeRepository, EmployeeRepository>();
+
+//  Build ServiceProvider
+using var serviceProvider = serviceCollection.BuildServiceProvider();
+
+// Resolve and Use the LeaveManagementService
+var leaveManagementService = serviceProvider.GetRequiredService<ILeaveManagementService>();
 
 Console.WriteLine("--- Leave management app ---");
 
@@ -7,7 +29,7 @@ Menus.ShowMainMenu();
 
 var userInput = Console.ReadLine();
 
-Application application = new();
+    Application application = new();
 
 while (true)
 {

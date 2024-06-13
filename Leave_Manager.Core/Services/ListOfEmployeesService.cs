@@ -5,45 +5,71 @@ using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
 
 namespace Leave_Manager.Leave_Manager.Core.Services
 {
-    public class ListOfEmployeesService : IListOfEmployeesServices
+    public class ListOfEmployeesService : IListOfEmployeesService
     {
-        public List<Employee> Employees { get; set; } = [];
+        private readonly IEmployeeRepository _employeeRepository;
+        private readonly LMDbContext _context;
+        private List<Employee> _employees = new List<Employee>();
+
+        //public List<Employee> Employees { get; set; } = [];
         private LeaveManagementService allLeavesInStorage;
+
+        public ListOfEmployeesService(IEmployeeRepository employeeRepository, LMDbContext context)
+        {
+            _employeeRepository = employeeRepository;
+            _context = context;
+
+            LeaveManagementService allLeavesInStorage = new(context);
+            this.allLeavesInStorage = allLeavesInStorage;
+
+            //Employees = GetAllEmployees();
+        }
 
         public ListOfEmployeesService()
         {
-            LeaveManagementService allLeavesInStorage = new();
+            LeaveManagementService allLeavesInStorage = new(_context);
             this.allLeavesInStorage = allLeavesInStorage;
 
-            Employees = GetAllEmployees();
+            _employees = GetAllEmployees();
         }
 
         //employee-related methods
-        private List<Employee> GetAllEmployees()
+
+        public List<Employee> Employees
         {
-            using (var context = new LMDbContext())
-            {
-                var allEmployees = context.Employees.ToList();
-
-                foreach (var employee in allEmployees)
-                {
-                    employee.LeaveLimits = context.LeaveLimits.Where(l => l.Employee == employee).ToList();
-                }
-
-                if (allEmployees.Any())
-                {
-                    foreach (var employee in allEmployees)
-                    {
-                        Console.WriteLine($"Employee's name: {employee.FirstName} {employee.LastName}");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("No employees found.");
-                }
-                return allEmployees;
-            }
+            get { return _employees; }
         }
+
+        public List<Employee> GetAllEmployees()
+        {
+            return _employeeRepository.GetAllEmployeesSync();
+        }
+
+        //private List<Employee> GetAllEmployees()
+        //{
+        //    using (var context = new LMDbContext())
+        //    {
+        //        var allEmployees = context.Employees.ToList();
+
+        //        foreach (var employee in allEmployees)
+        //        {
+        //            employee.LeaveLimits = context.LeaveLimits.Where(l => l.Employee == employee).ToList();
+        //        }
+
+        //        if (allEmployees.Any())
+        //        {
+        //            foreach (var employee in allEmployees)
+        //            {
+        //                Console.WriteLine($"Employee's name: {employee.FirstName} {employee.LastName}");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            Console.WriteLine("No employees found.");
+        //        }
+        //        return allEmployees;
+        //    }
+        //}
 
         private bool EmployeeExists(int employeeId)
         {
@@ -61,21 +87,36 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 
         private bool AddLeaveLimitLastPart(Employee employee, LeaveLimit leaveLimit)
         {
-            using (var context = new LMDbContext())
+            var employeeToUpdate = _context.Employees.Find(employee.Id);
+
+            if (employeeToUpdate != null)
             {
-                var employeeToUpdate = context.Employees.Find(employee.Id);
-                if (employeeToUpdate != null)
-                {
-                    employeeToUpdate.LeaveLimits.Add(leaveLimit);
-                    context.SaveChanges();
-                    return true;
-                }
-                else
-                {
-                    Console.WriteLine("Employee not found in database.");
-                    return false;
-                }
+                employeeToUpdate.LeaveLimits.Add(leaveLimit);
+                _context.SaveChanges();
+                return true;
             }
+            else
+            {
+                Console.WriteLine("Employee not found in database.");
+                return false;
+            }
+
+            //using (var context = new LMDbContext())
+            //{
+            //    var employeeToUpdate = context.Employees.Find(employee.Id);
+            //    if (employeeToUpdate != null)
+            //    {
+            //        employeeToUpdate.LeaveLimits.Add(leaveLimit);
+            //        context.SaveChanges();
+            //        return true;
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine("Employee not found in database.");
+            //        return false;
+            //    }
+            //}
+
         }
 
         private void PropagateLeaveLimitsForCurrentYearForAllEmployees()
@@ -383,21 +424,18 @@ namespace Leave_Manager.Leave_Manager.Core.Services
         private void AddEmployeeLastPart(Employee newEmployee)
         {
             int newEmployeeId;
-            using (var context = new LMDbContext())
+            var employee = new Employee
             {
-                var employee = new Employee
-                {
-                    FirstName = newEmployee.FirstName,
-                    LastName = newEmployee.LastName,
-                    DayOfJoining = newEmployee.DayOfJoining,
-                    LeavesPerYear = newEmployee.LeavesPerYear,
-                    OnDemandPerYear = newEmployee.OnDemandPerYear,
-                    HowManyYearsToTakePastLeave = newEmployee.HowManyYearsToTakePastLeave
-                };
-                context.Employees.Add(employee);
-                context.SaveChanges();
-                newEmployeeId = employee.Id;
-            }
+                FirstName = newEmployee.FirstName,
+                LastName = newEmployee.LastName,
+                DayOfJoining = newEmployee.DayOfJoining,
+                LeavesPerYear = newEmployee.LeavesPerYear,
+                OnDemandPerYear = newEmployee.OnDemandPerYear,
+                HowManyYearsToTakePastLeave = newEmployee.HowManyYearsToTakePastLeave
+            };
+            _context.Employees.Add(employee);
+            _context.SaveChanges();
+            newEmployeeId = employee.Id;
             newEmployee.Id = newEmployeeId;
             Employees.Add(newEmployee);
             DisplayEmployeeDetails(newEmployee, 0, 0);
@@ -406,25 +444,22 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 
         private void EditEmployeeLastPart(Employee oldEmployeeChanged)
         {
-            using (var context = new LMDbContext())
+            var existingEmployee = _context.Employees.Find(oldEmployeeChanged.Id);
+
+            if (existingEmployee != null)
             {
-                var existingEmployee = context.Employees.Find(oldEmployeeChanged.Id);
+                existingEmployee.FirstName = oldEmployeeChanged.FirstName;
+                existingEmployee.LastName = oldEmployeeChanged.LastName;
+                existingEmployee.DayOfJoining = oldEmployeeChanged.DayOfJoining;
+                existingEmployee.LeavesPerYear = oldEmployeeChanged.LeavesPerYear;
+                existingEmployee.OnDemandPerYear = oldEmployeeChanged.OnDemandPerYear;
+                existingEmployee.HowManyYearsToTakePastLeave = oldEmployeeChanged.HowManyYearsToTakePastLeave;
 
-                if (existingEmployee != null)
-                {
-                    existingEmployee.FirstName = oldEmployeeChanged.FirstName;
-                    existingEmployee.LastName = oldEmployeeChanged.LastName;
-                    existingEmployee.DayOfJoining = oldEmployeeChanged.DayOfJoining;
-                    existingEmployee.LeavesPerYear = oldEmployeeChanged.LeavesPerYear;
-                    existingEmployee.OnDemandPerYear = oldEmployeeChanged.OnDemandPerYear;
-                    existingEmployee.HowManyYearsToTakePastLeave = oldEmployeeChanged.HowManyYearsToTakePastLeave;
-
-                    context.SaveChanges();
-                }
-                else
-                {
-                    Console.WriteLine("Database record (employee) not found.");
-                }
+                _context.SaveChanges();
+            }
+            else
+            {
+                Console.WriteLine("Database record (employee) not found.");
             }
 
             Console.WriteLine("Employee's details are changed");
@@ -476,11 +511,8 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             else
             {
                 var employeeToRemove = Employees.First(c => c.Id == employeeId);
-                using (var context = new LMDbContext())
-                {
-                    context.Employees.Remove(employeeToRemove);
-                    context.SaveChanges();
-                }
+                _context.Employees.Remove(employeeToRemove);
+                _context.SaveChanges();
                 Employees.Remove(employeeToRemove);
             }
         }

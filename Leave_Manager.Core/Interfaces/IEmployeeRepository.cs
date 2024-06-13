@@ -2,8 +2,12 @@
 
 namespace Leave_Manager.Leave_Manager.Core.Interfaces
 {
-    internal interface IEmployeeRepository
+    public interface IEmployeeRepository
     {
-        List<Employee> GetAllUsers();
+        Task<Employee> AddEmployeeAsync(Employee employee);
+        Task DeleteEmployeeAsync(int id);
+        List<Employee> GetAllEmployeesSync();
+        Task<Employee?> GetEmployeeByIdAsync(int id);
+        Task UpdateEmployeeAsync(Employee employee);
     }
 }

@@ -7,60 +7,79 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 {
     public class LeaveManagementService : ILeaveManagementService
     {
-        public List<Leave> Leaves { get; set; } = [];
+        private readonly LMDbContext _context;
+        public List<Leave> Leaves { get; private set; } = [];
 
-        public LeaveManagementService()
+        public LeaveManagementService(LMDbContext context)
         {
-            Leaves = GetAllLeaves();
+            // Check if 'context' is null and throw an exception
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context), "Database context cannot be null.");
+            }
+
+            _context = context;
+            Leaves = _context.Leaves.ToList();
         }
 
-        private List<Leave> GetAllLeaves()
-        {
-            using (var context = new LMDbContext())
-            {
-                var allLeaves = context.Leaves.ToList();
+        //public List<Leave> GetAllLeaves()
+        //{
+        //    return _context.Leaves.ToList();
+        //}
 
-                if (allLeaves.Any())
-                {
-                    Console.WriteLine($"Leaves are transferred from database.");
-                }
-                else
-                {
-                    Console.WriteLine("No leaves were found in database.");
-                }
-                return allLeaves;
+
+        //        public LeaveManagementService(LMDbContext context)
+        //        {
+        //            if (context == null)
+        //            {
+        //                throw new ArgumentNullException(nameof(context), "Database context cannot be null.");
+        //            }
+
+        //            _context = context;
+        //            Leaves = _context.Leaves.ToList();
+        ////            Leaves = GetAllLeaves();
+        //        }
+
+        public List<Leave> GetAllLeaves()
+        {
+            var allLeaves = _context.Leaves.ToList();
+
+            if (allLeaves.Any())
+            {
+                Console.WriteLine($"Leaves are transferred from database.");
             }
+            else
+            {
+                Console.WriteLine("No leaves were found in database.");
+            }
+            return allLeaves;
         }
 
         private void AddLeaveLastPart(Leave leave)
         {
             Leave leaveHere;
             int newLeaveId;
-            using (var context = new LMDbContext())
+            leaveHere = new Leave()
             {
-                leaveHere = new Leave()
-                {
-                    EmployeeId = leave.EmployeeId,
-                    DateFrom = leave.DateFrom,
-                    DateTo = leave.DateTo,
-                    IsOnDemand = leave.IsOnDemand
-                };
-                context.Leaves.Add(leaveHere);
-                context.SaveChanges();
-                newLeaveId = leaveHere.Id;
-            }
+                EmployeeId = leave.EmployeeId,
+                DateFrom = leave.DateFrom,
+                DateTo = leave.DateTo,
+                IsOnDemand = leave.IsOnDemand
+            };
+
+            _context.Leaves.Add(leaveHere);
+            _context.SaveChanges();
+
+            newLeaveId = leaveHere.Id;
             leave.Id = newLeaveId;
+
             Leaves.Add(leave);
         }
 
         private void RemoveLeaveLastPart(Leave leave)
         {
-            using (var context = new LMDbContext())
-            {
-                context.Leaves.Remove(leave);
-                context.SaveChanges();
-            }
-
+            _context.Leaves.Remove(leave);
+            _context.SaveChanges();
             Leaves.Remove(leave);
         }
 
@@ -119,7 +138,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 Console.Write("Overlapping: ");
                 foreach (Leave l in leavesOverlapping)
                 {
-                    Leave.DisplayLeaveDetails(l);
+                    AuxiliaryMethods.DisplayLeaveDetails(l);
                 }
                 return false;
             }
