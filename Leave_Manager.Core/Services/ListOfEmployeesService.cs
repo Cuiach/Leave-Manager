@@ -40,36 +40,33 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             get { return _employees; }
         }
 
+        //public List<Employee> GetAllEmployees()
+        //{
+        //    return _employeeRepository.GetAllEmployeesSync();
+        //}
+
         public List<Employee> GetAllEmployees()
         {
-            return _employeeRepository.GetAllEmployeesSync();
+            var allEmployees = _context.Employees.ToList();
+
+            foreach (var employee in allEmployees)
+            {
+                employee.LeaveLimits = _context.LeaveLimits.Where(l => l.Employee == employee).ToList();
+            }
+
+            if (allEmployees.Any())
+            {
+                foreach (var employee in allEmployees)
+                {
+                    Console.WriteLine($"Employee's name: {employee.FirstName} {employee.LastName}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No employees found.");
+            }
+            return allEmployees;
         }
-
-        //private List<Employee> GetAllEmployees()
-        //{
-        //    using (var context = new LMDbContext())
-        //    {
-        //        var allEmployees = context.Employees.ToList();
-
-        //        foreach (var employee in allEmployees)
-        //        {
-        //            employee.LeaveLimits = context.LeaveLimits.Where(l => l.Employee == employee).ToList();
-        //        }
-
-        //        if (allEmployees.Any())
-        //        {
-        //            foreach (var employee in allEmployees)
-        //            {
-        //                Console.WriteLine($"Employee's name: {employee.FirstName} {employee.LastName}");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine("No employees found.");
-        //        }
-        //        return allEmployees;
-        //    }
-        //}
 
         private bool EmployeeExists(int employeeId)
         {

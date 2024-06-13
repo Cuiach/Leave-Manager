@@ -22,24 +22,6 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             Leaves = _context.Leaves.ToList();
         }
 
-        //public List<Leave> GetAllLeaves()
-        //{
-        //    return _context.Leaves.ToList();
-        //}
-
-
-        //        public LeaveManagementService(LMDbContext context)
-        //        {
-        //            if (context == null)
-        //            {
-        //                throw new ArgumentNullException(nameof(context), "Database context cannot be null.");
-        //            }
-
-        //            _context = context;
-        //            Leaves = _context.Leaves.ToList();
-        ////            Leaves = GetAllLeaves();
-        //        }
-
         public List<Leave> GetAllLeaves()
         {
             var allLeaves = _context.Leaves.ToList();

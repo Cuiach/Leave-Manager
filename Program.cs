@@ -15,13 +15,17 @@ serviceCollection.AddDbContext<LMDbContext>(options =>
 
 // 1.2. Register Dependencies (Make sure this is here, BEFORE building the service provider)
 serviceCollection.AddScoped<ILeaveManagementService, LeaveManagementService>(); 
-//serviceCollection.AddScoped<IEmployeeRepository, EmployeeRepository>();
+serviceCollection.AddScoped<IListOfEmployeesService, ListOfEmployeesService>();
+serviceCollection.AddScoped<IEmployeeRepository, EmployeeRepository>();
+serviceCollection.AddScoped<Application>();
 
 //  Build ServiceProvider
-using var serviceProvider = serviceCollection.BuildServiceProvider();
+var serviceProvider = serviceCollection.BuildServiceProvider();
 
 // Resolve and Use the LeaveManagementService
-var leaveManagementService = serviceProvider.GetRequiredService<ILeaveManagementService>();
+var application = serviceProvider.GetRequiredService<Application>();
+//var leaveManagementService = serviceProvider.GetRequiredService<ILeaveManagementService>();
+//var listOfEmployeesService = serviceProvider.GetRequiredService<IListOfEmployeesService>();
 
 Console.WriteLine("--- Leave management app ---");
 
@@ -29,7 +33,7 @@ Menus.ShowMainMenu();
 
 var userInput = Console.ReadLine();
 
-    Application application = new();
+//    Application application = new();
 
 while (true)
 {
