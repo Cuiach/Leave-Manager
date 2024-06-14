@@ -389,18 +389,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 
         private void AddEmployeeLastPart(Employee newEmployee)
         {
-            int newEmployeeId;
-            var employee = new Employee
-            {
-                FirstName = newEmployee.FirstName,
-                LastName = newEmployee.LastName,
-                DayOfJoining = newEmployee.DayOfJoining,
-                LeavesPerYear = newEmployee.LeavesPerYear,
-                OnDemandPerYear = newEmployee.OnDemandPerYear,
-                HowManyYearsToTakePastLeave = newEmployee.HowManyYearsToTakePastLeave
-            };
-
-            newEmployee.Id = _employeeRepository.AddEmployeeSync(employee);
+            newEmployee.Id = _employeeRepository.AddEmployeeSync(newEmployee);
             Employees.Add(newEmployee);
 
             DisplayEmployeeDetails(newEmployee, 0, 0);
@@ -425,9 +414,6 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 
             if (firstName != null && lastName != null)
             {
-                //int newEmployeeId = Employees.Count == 0 ? 1 : Employees.LastOrDefault().Id + 1;
-
-                //var newEmployee = new Employee(firstName, lastName, newEmployeeId);
                 var newEmployee = new Employee(firstName, lastName);
 
                 Console.WriteLine($"On Demand for the employee per year - is it {defaultOnDemand}? If yes press enter; if not put correct number and enter");
