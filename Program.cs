@@ -12,7 +12,6 @@ var serviceCollection = new ServiceCollection();
 serviceCollection.AddDbContext<LMDbContext>(options =>
     options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=Leave_Manager_ConsoleDb;Trusted_Connection=True;"));
 
-
 // 1.2. Register Dependencies (Make sure this is here, BEFORE building the service provider)
 serviceCollection.AddScoped<ILeaveManagementService, LeaveManagementService>(); 
 serviceCollection.AddScoped<IListOfEmployeesService, ListOfEmployeesService>();

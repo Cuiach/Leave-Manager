@@ -7,6 +7,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 {
     public class ListOfEmployeesService : IListOfEmployeesService
     {
+        private readonly ILeaveManagementService _leaveManagementService;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly LMDbContext _context;
         private List<Employee> _employees = new List<Employee>();
@@ -14,23 +15,17 @@ namespace Leave_Manager.Leave_Manager.Core.Services
         //public List<Employee> Employees { get; set; } = [];
         private LeaveManagementService allLeavesInStorage;
 
-        public ListOfEmployeesService(IEmployeeRepository employeeRepository, LMDbContext context)
+        public ListOfEmployeesService(ILeaveManagementService leaveManagementService/*, IEmployeeRepository employeeRepository*/, LMDbContext context)
         {
-            _employeeRepository = employeeRepository;
+            _leaveManagementService = leaveManagementService;
+//            _employeeRepository = employeeRepository;
             _context = context;
+            _employees = GetAllEmployees();
 
             LeaveManagementService allLeavesInStorage = new(context);
             this.allLeavesInStorage = allLeavesInStorage;
 
             //Employees = GetAllEmployees();
-        }
-
-        public ListOfEmployeesService()
-        {
-            LeaveManagementService allLeavesInStorage = new(_context);
-            this.allLeavesInStorage = allLeavesInStorage;
-
-            _employees = GetAllEmployees();
         }
 
         //employee-related methods
@@ -54,14 +49,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 employee.LeaveLimits = _context.LeaveLimits.Where(l => l.Employee == employee).ToList();
             }
 
-            if (allEmployees.Any())
-            {
-                foreach (var employee in allEmployees)
-                {
-                    Console.WriteLine($"Employee's name: {employee.FirstName} {employee.LastName}");
-                }
-            }
-            else
+            if (!allEmployees.Any())
             {
                 Console.WriteLine("No employees found.");
             }

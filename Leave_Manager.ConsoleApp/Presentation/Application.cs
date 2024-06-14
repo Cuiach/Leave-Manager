@@ -5,16 +5,12 @@ namespace Leave_Manager.Leave_Manager.ConsoleApp.Presentation
 {
     public class Application
     {
-        private readonly ILeaveManagementService _leaveManagementService;
         private readonly IListOfEmployeesService _listOfEmployeesService;
 
-        public Application(ILeaveManagementService leaveManagementService, IListOfEmployeesService listOfEmployeesService)
+        public Application(IListOfEmployeesService listOfEmployeesService)
         {
-            _leaveManagementService = leaveManagementService;
             _listOfEmployeesService = listOfEmployeesService;
         }
-
-        //ListOfEmployeesService listOfEmployees = new();
 
         public void AddEmployee()
         {
