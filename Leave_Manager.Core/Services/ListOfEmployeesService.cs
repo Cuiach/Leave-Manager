@@ -38,15 +38,9 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             get { return _employees; }
         }
 
-        //public List<Employee> GetAllEmployees()
-        //{
-        //    return _employeeRepository.GetAllEmployeesSync();
-        //}
-
         public List<Employee> GetAllEmployees()
         {
             var allEmployees = _employeeRepository.GetAllEmployeesSync();
-            //var allEmployees = _context.Employees.ToList();
 
             foreach (var employee in allEmployees)
             {
@@ -89,23 +83,6 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 Console.WriteLine("Employee not found in database.");
                 return false;
             }
-
-            //using (var context = new LMDbContext())
-            //{
-            //    var employeeToUpdate = context.Employees.Find(employee.Id);
-            //    if (employeeToUpdate != null)
-            //    {
-            //        employeeToUpdate.LeaveLimits.Add(leaveLimit);
-            //        context.SaveChanges();
-            //        return true;
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine("Employee not found in database.");
-            //        return false;
-            //    }
-            //}
-
         }
 
         private void PropagateLeaveLimitsForCurrentYearForAllEmployees()
@@ -422,34 +399,17 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 OnDemandPerYear = newEmployee.OnDemandPerYear,
                 HowManyYearsToTakePastLeave = newEmployee.HowManyYearsToTakePastLeave
             };
-            _context.Employees.Add(employee);
-            _context.SaveChanges();
-            newEmployeeId = employee.Id;
-            newEmployee.Id = newEmployeeId;
+
+            newEmployee.Id = _employeeRepository.AddEmployeeSync(employee);
             Employees.Add(newEmployee);
+
             DisplayEmployeeDetails(newEmployee, 0, 0);
             Console.WriteLine("Day of joining of employee is set to today. If you want to change it go to edit settings");
         }
 
         private void EditEmployeeLastPart(Employee oldEmployeeChanged)
         {
-            var existingEmployee = _context.Employees.Find(oldEmployeeChanged.Id);
-
-            if (existingEmployee != null)
-            {
-                existingEmployee.FirstName = oldEmployeeChanged.FirstName;
-                existingEmployee.LastName = oldEmployeeChanged.LastName;
-                existingEmployee.DayOfJoining = oldEmployeeChanged.DayOfJoining;
-                existingEmployee.LeavesPerYear = oldEmployeeChanged.LeavesPerYear;
-                existingEmployee.OnDemandPerYear = oldEmployeeChanged.OnDemandPerYear;
-                existingEmployee.HowManyYearsToTakePastLeave = oldEmployeeChanged.HowManyYearsToTakePastLeave;
-
-                _context.SaveChanges();
-            }
-            else
-            {
-                Console.WriteLine("Database record (employee) not found.");
-            }
+            _employeeRepository.UpdateEmployeeAsync(oldEmployeeChanged);
 
             Console.WriteLine("Employee's details are changed");
         }
@@ -480,9 +440,6 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 newEmployee.DayOfJoining = DateTime.Today;
 
                 AddEmployeeLastPart(newEmployee);
-                //Employees.Add(newEmployee);
-                //DisplayEmployeeDetails(newEmployee, 0, 0);
-                //Console.WriteLine("Day of joining of employee is set to today. If you want to change it go to edit settings");
             }
         }
 
@@ -500,8 +457,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             else
             {
                 var employeeToRemove = Employees.First(c => c.Id == employeeId);
-                _context.Employees.Remove(employeeToRemove);
-                _context.SaveChanges();
+                _employeeRepository.DeleteEmployeeAsync(employeeId);
                 Employees.Remove(employeeToRemove);
             }
         }
@@ -542,6 +498,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             else
             {
                 employee.OnDemandPerYear = newOnDemand;
+                //_employeeRepository.UpdateEmployeeAsync(employee);
                 Console.WriteLine($"On demand leave limit: {employee.OnDemandPerYear} days");
             }
 
@@ -572,7 +529,9 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 }
                 newDateOfRecruitment = DateTime.ParseExact(dateFromUser, "yyyy-MM-dd", null);
 
-                Leave oldestLeave = allLeavesInStorage.Leaves.OrderBy(l => l.DateFrom).FirstOrDefault();
+                Leave oldestLeave = allLeavesInStorage.Leaves.
+                    Where(l => l.EmployeeId == employeeIdToEdit).
+                    OrderBy(l => l.DateFrom).FirstOrDefault();
                 if (oldestLeave != null)
                 {
                     if (oldestLeave.DateFrom < newDateOfRecruitment)

@@ -23,11 +23,11 @@ namespace Leave_Manager.Leave_Manager.Infrastructure.Persistence
             return await _context.Employees.FindAsync(id);
         }
 
-        public async Task<Employee> AddEmployeeAsync(Employee employee)
+        public int AddEmployeeSync(Employee employee)
         {
             _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
-            return employee; // Return the added employee with any DB-generated values
+            _context.SaveChanges();
+            return employee.Id;
         }
 
         public async Task UpdateEmployeeAsync(Employee employee)
