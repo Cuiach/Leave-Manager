@@ -15,10 +15,13 @@ namespace Leave_Manager.Leave_Manager.Core.Services
         //public List<Employee> Employees { get; set; } = [];
         private LeaveManagementService allLeavesInStorage;
 
-        public ListOfEmployeesService(ILeaveManagementService leaveManagementService/*, IEmployeeRepository employeeRepository*/, LMDbContext context)
+        public ListOfEmployeesService(
+            ILeaveManagementService leaveManagementService, 
+            IEmployeeRepository employeeRepository, 
+            LMDbContext context)
         {
             _leaveManagementService = leaveManagementService;
-//            _employeeRepository = employeeRepository;
+            _employeeRepository = employeeRepository;
             _context = context;
             _employees = GetAllEmployees();
 
@@ -42,7 +45,8 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 
         public List<Employee> GetAllEmployees()
         {
-            var allEmployees = _context.Employees.ToList();
+            var allEmployees = _employeeRepository.GetAllEmployeesSync();
+            //var allEmployees = _context.Employees.ToList();
 
             foreach (var employee in allEmployees)
             {
