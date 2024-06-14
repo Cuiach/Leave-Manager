@@ -2,6 +2,7 @@
 using Leave_Manager.Leave_Manager.Core.Entities;
 using Leave_Manager.Leave_Manager.Core.Interfaces;
 using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace Leave_Manager.Leave_Manager.Core.Services
 {
@@ -51,9 +52,9 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 
             _context.Leaves.Add(leaveHere);
             _context.SaveChanges();
-
             newLeaveId = leaveHere.Id;
             leave.Id = newLeaveId;
+            _context.Entry(leaveHere).State = EntityState.Detached;
 
             Leaves.Add(leave);
         }
