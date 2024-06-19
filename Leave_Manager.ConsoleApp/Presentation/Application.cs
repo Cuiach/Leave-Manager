@@ -1,7 +1,7 @@
 ﻿using Leave_Manager.Leave_Manager.Core.Interfaces;
-using Leave_Manager.Leave_Manager.Core.Services;
+using System.Threading.Tasks;
 
-namespace Leave_Manager.Leave_Manager.ConsoleApp.Presentation
+namespace Leave_Manager.Application
 {
     public class Application
     {
@@ -12,64 +12,64 @@ namespace Leave_Manager.Leave_Manager.ConsoleApp.Presentation
             _listOfEmployeesService = listOfEmployeesService;
         }
 
-        public void AddEmployee()
+        public async Task AddEmployeeAsync()
         {
-            _listOfEmployeesService.AddEmployee();
+            await _listOfEmployeesService.AddEmployeeAsync();
         }
 
-        public void DisplayAllEmployees()
+        public async Task DisplayAllEmployeesAsync()
         {
-            _listOfEmployeesService.DisplayAllEmployees();
+            await _listOfEmployeesService.DisplayAllEmployeesAsync();
         }
 
-        public void DisplayMatchingEmployees(string searchPhrase)
+        public async Task DisplayMatchingEmployeesAsync(string searchPhrase)
         {
-            _listOfEmployeesService.DisplayMatchingEmployees(searchPhrase);
+            await _listOfEmployeesService.DisplayMatchingEmployeesAsync(searchPhrase);
         }
 
-        public void RemoveEmployee(int intToRemove)
+        public async Task RemoveEmployeeAsync(int intToRemove)
         {
-            _listOfEmployeesService.RemoveEmployee(intToRemove);
+            await _listOfEmployeesService.RemoveEmployeeAsync(intToRemove);
         }
 
-        public void AddLeave(int employeeId)
+        public async Task AddLeaveAsync(int employeeId)
         {
-            _listOfEmployeesService.AddLeave(employeeId);
+            await _listOfEmployeesService.AddLeaveAsync(employeeId);
         }
 
-        public void DisplayAllLeaves()
+        public async Task DisplayAllLeavesAsync()
         {
-            _listOfEmployeesService.DisplayAllLeaves();
+            await _listOfEmployeesService.DisplayAllLeavesAsync();
         }
 
-        public void DisplayAllLeavesOnDemand()
+        public async Task DisplayAllLeavesOnDemandAsync()
         {
-            _listOfEmployeesService.DisplayAllLeavesOnDemand();
+            await _listOfEmployeesService.DisplayAllLeavesOnDemandAsync();
         }
 
-        public void DisplayAllLeavesForEmployee(int employeeId)
+        public async Task DisplayAllLeavesForEmployeeAsync(int employeeId)
         {
-            _listOfEmployeesService.DisplayAllLeavesForEmployee(employeeId);
+            await _listOfEmployeesService.DisplayAllLeavesForEmployeeAsync(employeeId);
         }
 
-        public void DisplayAllLeavesForEmployeeOnDemand(int employeeId)
+        public async Task DisplayAllLeavesForEmployeeOnDemandAsync(int employeeId)
         {
-            _listOfEmployeesService.DisplayAllLeavesForEmployeeOnDemand(employeeId);
+            await _listOfEmployeesService.DisplayAllLeavesForEmployeeOnDemandAsync(employeeId);
         }
 
-        public void RemoveLeave(int intOfLeaveToRemove)
+        public async Task RemoveLeaveAsync(int intOfLeaveToRemove)
         {
-            _listOfEmployeesService.RemoveLeave(intOfLeaveToRemove);
+            await _listOfEmployeesService.RemoveLeaveAsync(intOfLeaveToRemove);
         }
 
-        public void EditLeave(int intOfLeaveToEdit)
+        public async Task EditLeaveAsync(int intOfLeaveToEdit)
         {
-            _listOfEmployeesService.EditLeave(intOfLeaveToEdit);
+            await _listOfEmployeesService.EditLeaveAsync(intOfLeaveToEdit);
         }
 
-        public void EditSettings(int EmployeeIdToEdit)
+        public async Task EditSettingsAsync(int employeeIdToEdit)
         {
-            _listOfEmployeesService.EditSettings(EmployeeIdToEdit);
+            await _listOfEmployeesService.EditSettingsAsync(employeeIdToEdit);
         }
     }
 }

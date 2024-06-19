@@ -2,6 +2,11 @@
 using Leave_Manager.Leave_Manager.Core.Entities;
 using Leave_Manager.Leave_Manager.Core.Interfaces;
 using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Leave_Manager.Leave_Manager.Core.Services
 {
@@ -9,34 +14,25 @@ namespace Leave_Manager.Leave_Manager.Core.Services
     {
         private readonly ILeaveManagementService _leaveManagementService;
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly ILeaveRepository _leaveRepository;
         private readonly LMDbContext _context;
         private List<Employee> _employees = new List<Employee>();
 
-        //public List<Employee> Employees { get; set; } = [];
-        private LeaveManagementService allLeavesInStorage;
-
         public ListOfEmployeesService(
-            ILeaveManagementService leaveManagementService, 
-            IEmployeeRepository employeeRepository, 
+            ILeaveManagementService leaveManagementService,
+            IEmployeeRepository employeeRepository,
+            ILeaveRepository leaveRepository,
             LMDbContext context)
         {
             _leaveManagementService = leaveManagementService;
             _employeeRepository = employeeRepository;
+            _leaveRepository = leaveRepository;
             _context = context;
             _employees = GetAllEmployees();
-
-            LeaveManagementService allLeavesInStorage = new(context);
-            this.allLeavesInStorage = allLeavesInStorage;
-
-            //Employees = GetAllEmployees();
         }
 
-        //employee-related methods
-
-        public List<Employee> Employees
-        {
-            get { return _employees; }
-        }
+        // Employee-related methods
+        public List<Employee> Employees => _employees;
 
         public List<Employee> GetAllEmployees()
         {
@@ -118,11 +114,11 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             }
         }
 
-        private bool CheckIfLeaveLimitExistsForCurrentYear(Employee employee)
+        private async Task<bool> CheckIfLeaveLimitExistsForCurrentYearAsync(Employee employee)
         {
             if (!employee.LeaveLimitForCurrentYearExists())
             {
-                Console.WriteLine("It looks there is one or more employees who do not have leave limit set for this year. Do you want to fill leave limits in all missing places? Put y if yes");
+                Console.WriteLine("It looks there is one or more employees who do not have a leave limit set for this year. Do you want to fill leave limits in all missing places? Put y if yes");
                 if (Console.ReadLine() == "y")
                 {
                     PropagateLeaveLimitsForCurrentYearForAllEmployees();
@@ -139,7 +135,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             }
         }
 
-        private void DisplayEmployeeDetails(Employee employee, int leaveDaysTaken, int onDemandTaken)
+        private async Task DisplayEmployeeDetailsAsync(Employee employee, int leaveDaysTaken, int onDemandTaken)
         {
             LeaveLimit leaveLimitThisYear = employee.LeaveLimits.First(l => l.Year == DateTime.Now.Year);
             int previousYear = DateTime.Now.Year - 1;
@@ -151,39 +147,38 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             }
 
             Console.Write($"Employee: {employee.FirstName}, {employee.LastName}, {employee.Id}, leaves: {leaveDaysTaken}/{leaveDaysAvailable}, " +
-                $"on demand: {onDemandTaken}/{employee.OnDemandPerYear}, joined: {employee.DayOfJoining.Year}.{employee.DayOfJoining.Month}.{employee.DayOfJoining.Day},");
+                          $"on demand: {onDemandTaken}/{employee.OnDemandPerYear}, joined: {employee.DayOfJoining:yyyy.MM.dd},");
 
-            int nowOrFutureYearIfFutureLeaveExists =
-                DateTime.Now.Year >= allLeavesInStorage.GetLastLeaveYearOfEmployee(employee.Id) ?
-                DateTime.Now.Year : allLeavesInStorage.GetLastLeaveYearOfEmployee(employee.Id);
+            int lastLeaveYear = await _leaveManagementService.GetLastLeaveYearOfEmployeeAsync(employee.Id);
+            int nowOrFutureYearIfFutureLeaveExists = DateTime.Now.Year >= lastLeaveYear ? DateTime.Now.Year : lastLeaveYear;
 
             for (int i = employee.DayOfJoining.Year; i <= nowOrFutureYearIfFutureLeaveExists; i++)
             {
                 LeaveLimit limitPerYear = employee.LeaveLimits.FirstOrDefault(l => l.Year == i);
-                Console.Write($" {i}/{limitPerYear.Limit}");
+                Console.Write($" {i}/{limitPerYear?.Limit ?? 0}");
             }
             Console.WriteLine();
-            ShowLeaveAvailableForAllPastYears(employee);
+            await ShowLeaveAvailableForAllPastYearsAsync(employee);
         }
 
-        private void DisplayAllEmployeesDetails(List<Employee> employees)
+        private async Task DisplayAllEmployeesDetailsAsync(List<Employee> employees)
         {
             foreach (var employee in employees)
             {
-                if (CheckIfLeaveLimitExistsForCurrentYear(employee))
+                if (await CheckIfLeaveLimitExistsForCurrentYearAsync(employee))
                 {
-                    var leaveDaysTakenThisYear = allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, DateTime.Now.Year);
-                    var onDemandTaken = allLeavesInStorage.GetSumOnDemand(employee.Id);
-                    DisplayEmployeeDetails(employee, leaveDaysTakenThisYear, onDemandTaken);
+                    var leaveDaysTakenThisYear = await _leaveManagementService.GetSumOfDaysOnLeaveTakenByEmployeeInYearAsync(employee.Id, DateTime.Now.Year);
+                    var onDemandTaken = await _leaveManagementService.GetSumOnDemandAsync(employee.Id);
+                    await DisplayEmployeeDetailsAsync(employee, leaveDaysTakenThisYear, onDemandTaken);
                 }
                 else
                 {
-                    Console.WriteLine("Leave limit for employee is not set for current year. Thus it is not possible to show details.");
+                    Console.WriteLine("Leave limit for employee is not set for current year. Thus, it is not possible to show details.");
                 }
             }
         }
 
-        private void ChangeAccruedLeaveLimitPolicy(Employee employee)
+        private async Task ChangeAccruedLeaveLimitPolicyAsync(Employee employee)
         {
             var choice = "";
             string yearsWhenLeaveIsValid = "";
@@ -221,9 +216,9 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                         case "0":
                             employee.HowManyYearsToTakePastLeave = Employee.YearsToTakeLeave.CurrentOnly;
 
-                            if (IsLeaveLimitPolicySatisfied(employee, 0))
+                            if (await IsLeaveLimitPolicySatisfiedAsync(employee, 0))
                             {
-                                EditEmployeeLastPart(employee);
+                                await EditEmployeeLastPartAsync(employee);
                                 Console.WriteLine("Accrued leave cap set to: current year only.");
                             }
                             else
@@ -237,9 +232,9 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                         case "1":
                             employee.HowManyYearsToTakePastLeave = Employee.YearsToTakeLeave.OneMore;
 
-                            if (IsLeaveLimitPolicySatisfied(employee, 0))
+                            if (await IsLeaveLimitPolicySatisfiedAsync(employee, 0))
                             {
-                                EditEmployeeLastPart(employee);
+                                await EditEmployeeLastPartAsync(employee);
                                 Console.WriteLine("Accrued leave cap set to: 1 more past year.");
                             }
                             else
@@ -253,9 +248,9 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                         case "2":
                             employee.HowManyYearsToTakePastLeave = Employee.YearsToTakeLeave.TwoMore;
 
-                            if (IsLeaveLimitPolicySatisfied(employee, 0))
+                            if (await IsLeaveLimitPolicySatisfiedAsync(employee, 0))
                             {
-                                EditEmployeeLastPart(employee);
+                                await EditEmployeeLastPartAsync(employee);
                                 Console.WriteLine("Accrued leave cap set to: 2 more past years.");
                             }
                             else
@@ -268,7 +263,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 
                         case "3":
                             employee.HowManyYearsToTakePastLeave = Employee.YearsToTakeLeave.NoLimit;
-                            EditEmployeeLastPart(employee);
+                            await EditEmployeeLastPartAsync(employee);
                             Console.WriteLine("Accrued leave cap set to: no limit.");
                             break;
 
@@ -292,15 +287,15 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             }
             else
             {
-                EditEmployeeLastPart(employee);
+                await EditEmployeeLastPartAsync(employee);
             }
         }
 
-        private void SeeAndChangeLeaveLimits(Employee employee)
+        private async Task SeeAndChangeLeaveLimitsAsync(Employee employee)
         {
             var choice = "";
             Employee employeeAuxiliary = new("employee", "auxiliary", 0);
-            int latestLeaveYear = allLeavesInStorage.GetLastLeaveYearOfEmployee(employee.Id);
+            int latestLeaveYear = await _leaveManagementService.GetLastLeaveYearOfEmployeeAsync(employee.Id);
             int yearToMakeChangesUpTo =
                 latestLeaveYear > DateTime.Now.Year ?
                 latestLeaveYear : DateTime.Now.Year;
@@ -360,7 +355,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                         {
                             int number = int.Parse(newLimit);
                             leaveLimit.Limit = number;
-                            if (IsLeaveLimitPolicySatisfied(employee, allLeavesInStorage.GetLastLeaveYearOfEmployee(employee.Id)))
+                            if (await IsLeaveLimitPolicySatisfiedAsync(employee, await _leaveManagementService.GetLastLeaveYearOfEmployeeAsync(employee.Id)))
                             {
                                 Console.WriteLine($"Year: {i}, limit is set to: {number}");
                             }
@@ -387,23 +382,23 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             }
         }
 
-        private void AddEmployeeLastPart(Employee newEmployee)
+        private async Task AddEmployeeLastPartAsync(Employee newEmployee)
         {
-            newEmployee.Id = _employeeRepository.AddEmployeeSync(newEmployee);
+            newEmployee.Id = await _employeeRepository.AddEmployeeAsync(newEmployee); // Async method
             Employees.Add(newEmployee);
 
-            DisplayEmployeeDetails(newEmployee, 0, 0);
-            Console.WriteLine("Day of joining of employee is set to today. If you want to change it go to edit settings");
+            await DisplayEmployeeDetailsAsync(newEmployee, 0, 0); // Async method
+            Console.WriteLine("Day of joining of employee is set to today. If you want to change it, go to edit settings");
         }
 
-        private void EditEmployeeLastPart(Employee oldEmployeeChanged)
+        private async Task EditEmployeeLastPartAsync(Employee oldEmployeeChanged)
         {
-            _employeeRepository.UpdateEmployeeAsync(oldEmployeeChanged);
+            await _employeeRepository.UpdateEmployeeAsync(oldEmployeeChanged);
 
             Console.WriteLine("Employee's details are changed");
         }
 
-        public void AddEmployee()
+        public async Task AddEmployeeAsync()
         {
             int defaultOnDemand = 4;
             int defaultLeavePerYear = 26;
@@ -416,25 +411,25 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             {
                 var newEmployee = new Employee(firstName, lastName);
 
-                Console.WriteLine($"On Demand for the employee per year - is it {defaultOnDemand}? If yes press enter; if not put correct number and enter");
+                Console.WriteLine($"On Demand for the employee per year - is it {defaultOnDemand}? If yes, press enter; if not, put the correct number and enter");
                 newEmployee.OnDemandPerYear = AuxiliaryMethods.SetNewLimit(Console.ReadLine(), defaultOnDemand);
-                Console.WriteLine($"On demand leave was set to: {newEmployee.OnDemandPerYear}");
+                Console.WriteLine($"On-demand leave was set to: {newEmployee.OnDemandPerYear}");
 
-                Console.WriteLine($"Leave days per year for the employee - is it {defaultLeavePerYear}? If yes press enter; if not put correct number and enter");
+                Console.WriteLine($"Leave days per year for the employee - is it {defaultLeavePerYear}? If yes, press enter; if not, put the correct number and enter");
                 newEmployee.PropagateLeaveLimitForCurrentYear(AuxiliaryMethods.SetNewLimit(Console.ReadLine(), defaultLeavePerYear), true);
 
                 newEmployee.DayOfJoining = DateTime.Today;
 
-                AddEmployeeLastPart(newEmployee);
+                await AddEmployeeLastPartAsync(newEmployee); // Use async method
             }
         }
 
-        public void DisplayAllEmployees()
+        public async Task DisplayAllEmployeesAsync()
         {
-            DisplayAllEmployeesDetails(Employees);
+            await DisplayAllEmployeesDetailsAsync(Employees);
         }
 
-        public void RemoveEmployee(int employeeId)
+        public async Task RemoveEmployeeAsync(int employeeId)
         {
             if (!EmployeeExists(employeeId))
             {
@@ -443,12 +438,12 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             else
             {
                 var employeeToRemove = Employees.First(c => c.Id == employeeId);
-                _employeeRepository.DeleteEmployeeAsync(employeeId);
+                await _employeeRepository.DeleteEmployeeAsync(employeeId); // Async method
                 Employees.Remove(employeeToRemove);
             }
         }
 
-        public void DisplayMatchingEmployees(string searchPhrase)
+        public async Task DisplayMatchingEmployeesAsync(string searchPhrase)
         {
             var matchingEmployees = Employees
                 .Where(e => e.FirstName == searchPhrase || e.LastName == searchPhrase)
@@ -456,7 +451,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 
             if (matchingEmployees.Any())
             {
-                DisplayAllEmployeesDetails(matchingEmployees);
+                await DisplayAllEmployeesDetailsAsync(matchingEmployees); // Async method
             }
             else
             {
@@ -464,7 +459,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             }
         }
 
-        public void EditSettings(int employeeIdToEdit)
+        public async Task EditSettingsAsync(int employeeIdToEdit)
         {
             if (!EmployeeExists(employeeIdToEdit))
             {
@@ -477,7 +472,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 
             Console.WriteLine($"On Demand for the employee per year - is it {employee.OnDemandPerYear}? If yes press enter; if not put correct number and enter");
             int newOnDemand = AuxiliaryMethods.SetNewLimit(Console.ReadLine(), employee.OnDemandPerYear);
-            if (allLeavesInStorage.GetSumOnDemand(employee.Id) > newOnDemand)
+            if (await _leaveManagementService.GetSumOnDemandAsync(employee.Id) > newOnDemand)
             {
                 Console.WriteLine($"On demand leave limit: {employee.OnDemandPerYear} days and cannot be changed. Check already taken leaves on demand.");
             }
@@ -492,7 +487,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             Employee auxiliaryEmployee = new("aux", "emp", 0);
             auxiliaryEmployee.LeavesPerYear = employee.LeavesPerYear;
             employee.PropagateLeaveLimitForCurrentYear(AuxiliaryMethods.SetNewLimit(Console.ReadLine(), employee.LeavesPerYear), false);
-            if (IsLeaveLimitPolicySatisfied(employee, allLeavesInStorage.GetLastLeaveYearOfEmployee(employeeIdToEdit)))
+            if (await IsLeaveLimitPolicySatisfiedAsync(employee, await _leaveManagementService.GetLastLeaveYearOfEmployeeAsync(employeeIdToEdit)))
             {
                 Console.WriteLine($"Leave limit: {employee.LeavesPerYear}");
             }
@@ -515,9 +510,10 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 }
                 newDateOfRecruitment = DateTime.ParseExact(dateFromUser, "yyyy-MM-dd", null);
 
-                Leave oldestLeave = allLeavesInStorage.Leaves.
-                    Where(l => l.EmployeeId == employeeIdToEdit).
-                    OrderBy(l => l.DateFrom).FirstOrDefault();
+                Leave oldestLeave = (await _leaveRepository.GetAllLeavesAsync())
+                    .Where(l => l.EmployeeId == employeeIdToEdit)
+                    .OrderBy(l => l.DateFrom)
+                    .FirstOrDefault();
                 if (oldestLeave != null)
                 {
                     if (oldestLeave.DateFrom < newDateOfRecruitment)
@@ -535,19 +531,21 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 }
             }
 
-            SeeAndChangeLeaveLimits(employee);
+            await SeeAndChangeLeaveLimitsAsync(employee); // Make async
 
-            ChangeAccruedLeaveLimitPolicy(employee);
+            await ChangeAccruedLeaveLimitPolicyAsync(employee); // Make async
+
+            await EditEmployeeLastPartAsync(employee);
         }
 
-        //leave-related methods
-        private bool IsLeaveLimitPolicySatisfied(Employee employee, int yearOfLeaveEnd)
+        // Leave-related methods 
+        private async Task<bool> IsLeaveLimitPolicySatisfiedAsync(Employee employee, int yearOfLeaveEnd)
         {
             int yearToWhichCheckPolicy = yearOfLeaveEnd > DateTime.Now.Year ? yearOfLeaveEnd : DateTime.Now.Year;
 
             for (int i = employee.DayOfJoining.Year; i <= yearToWhichCheckPolicy; i++)
             {
-                if (CountLeaveAvailable(employee, i, 0) < 0)
+                if (await CountLeaveAvailableAsync(employee, i, 0) < 0)
                 {
                     return false;
                 }
@@ -555,17 +553,10 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             return true;
         }
 
-        private bool IsOnDemandLimitSatisfied(Employee employee, int newOnDemandLeaveLength)
+        private async Task<bool> IsOnDemandLimitSatisfiedAsync(Employee employee, int newOnDemandLeaveLength)
         {
-            int onDemandTaken = allLeavesInStorage.GetSumOnDemand(employee.Id);
-            if (employee.OnDemandPerYear >= onDemandTaken + newOnDemandLeaveLength)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            int onDemandTaken = await _leaveManagementService.GetSumOnDemandAsync(employee.Id);
+            return employee.OnDemandPerYear >= onDemandTaken + newOnDemandLeaveLength;
         }
 
         private static bool IsLeaveAfterDateOfRecruitment(Employee employee, Leave leave)
@@ -584,12 +575,12 @@ namespace Leave_Manager.Leave_Manager.Core.Services
         private int ExcessLeaveFromPastYearCurrentOnly(Employee employee, int k)
         {
             return 0;
-        } //name may be misleading... "CurrentOnly" refers to for how many years not-taken past leave may be taken. In this method - only in current year.
+        }
 
         private int ExcessLeaveFromPastYearOneMore(Employee employee, int k)
         {
             LeaveLimit leaveLimitInYearK = employee.LeaveLimits.First(l => l.Year == k);
-            int sumOfLeavesInYearK = allLeavesInStorage.CountSumOfPastYearLeaveDays(employee.Id, k);
+            int sumOfLeavesInYearK = _leaveManagementService.CountSumOfPastYearLeaveDays(employee.Id, k); // Keep using synchronous method
 
             if (employee.DayOfJoining.Year != k)
             {
@@ -604,7 +595,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
         private int ExcessLeaveFromPastYearTwoMore(Employee employee, int k)
         {
             LeaveLimit leaveLimitInYearK = employee.LeaveLimits.First(l => l.Year == k);
-            int sumOfLeavesInYearK = allLeavesInStorage.CountSumOfPastYearLeaveDays(employee.Id, k);
+            int sumOfLeavesInYearK = _leaveManagementService.CountSumOfPastYearLeaveDays(employee.Id, k); // Keep using synchronous method
 
             if (employee.DayOfJoining.Year == k)
             {
@@ -625,7 +616,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
         private int ExcessLeaveFromPastYearNoLimit(Employee employee, int k)
         {
             LeaveLimit leaveLimitInYearK = employee.LeaveLimits.First(l => l.Year == k);
-            int sumOfLeavesInYearK = allLeavesInStorage.CountSumOfPastYearLeaveDays(employee.Id, k);
+            int sumOfLeavesInYearK = _leaveManagementService.CountSumOfPastYearLeaveDays(employee.Id, k); // Keep using synchronous method
 
             if (employee.DayOfJoining.Year != k)
             {
@@ -658,15 +649,15 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             return countedExcess;
         }
 
-        private int CountLeaveAvailable(Employee employee, int year, int whetherToDisplayLeaveDetails)
+        private async Task<int> CountLeaveAvailableAsync(Employee employee, int year, int whetherToDisplayLeaveDetails)
         {
             int result = 0;
             LeaveLimit leaveLimit = employee.LeaveLimits.First(l => l.Year == year);
-            result = leaveLimit.Limit - allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, year);
+            result = leaveLimit.Limit - await _leaveManagementService.GetSumOfDaysOnLeaveTakenByEmployeeInYearAsync(employee.Id, year);
 
             if (whetherToDisplayLeaveDetails == 1)
             {
-                Console.Write($"In {year} year: {leaveLimit.Limit} limit and {allLeavesInStorage.GetSumOfDaysOnLeaveTakenByEmployeeInYear(employee.Id, year)} taken.");
+                Console.Write($"In {year} year: {leaveLimit.Limit} limit and {await _leaveManagementService.GetSumOfDaysOnLeaveTakenByEmployeeInYearAsync(employee.Id, year)} taken.");
             }
 
             if (employee.DayOfJoining.Year < year)
@@ -676,27 +667,29 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             return result;
         }
 
-        private void ShowLeaveAvailableForAllPastYears(Employee employee) //rather for test purpose
+        private async Task ShowLeaveAvailableForAllPastYearsAsync(Employee employee)
         {
             int startingYear = employee.DayOfJoining.Year;
             int endingYear =
-                allLeavesInStorage.GetLastLeaveYearOfEmployee(employee.Id) <= DateTime.Now.Year ?
-                DateTime.Now.Year : allLeavesInStorage.GetLastLeaveYearOfEmployee(employee.Id);
+                (await _leaveManagementService.GetLastLeaveYearOfEmployeeAsync(employee.Id)) <= DateTime.Now.Year ?
+                DateTime.Now.Year : await _leaveManagementService.GetLastLeaveYearOfEmployeeAsync(employee.Id);
 
             Console.WriteLine("TEST PURPOSE:");
 
             for (int i = startingYear; i <= endingYear; i++)
             {
-                int k = CountLeaveAvailable(employee, i, 1);
+                int k = await CountLeaveAvailableAsync(employee, i, 1);
                 Console.WriteLine($" Accrued leave available in {i}: {k}");
             }
         }
 
-        private bool GetNewDatesOfLeave(Leave leave, Employee employee, bool totallyNewLeave)
+        private async Task<bool> GetNewDatesOfLeaveAsync(Leave leave, Employee employee, bool totallyNewLeave)
         {
-            Console.WriteLine(totallyNewLeave == true ? $"Default leave dates: from {leave.DateFrom}, to {leave.DateTo}. Put n if you want to set the dates manually" : "");
+            Console.WriteLine(totallyNewLeave
+                ? $"Default leave dates: from {leave.DateFrom}, to {leave.DateTo}. Put n if you want to set the dates manually"
+                : "");
 
-            if (totallyNewLeave == false || totallyNewLeave == true && Console.ReadLine() == "n")
+            if (totallyNewLeave == false || (totallyNewLeave == true && Console.ReadLine() == "n"))
             {
                 Console.WriteLine("Put date of beginning of leave (or put any letter to skip)");
                 if (DateTime.TryParseExact(Console.ReadLine(), "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out DateTime userDateTimeFrom))
@@ -706,7 +699,7 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 }
                 else
                 {
-                    Console.WriteLine(totallyNewLeave == true ? "You entered an incorrect value." : "Beginning of leave is not changed.");
+                    Console.WriteLine(totallyNewLeave ? "You entered an incorrect value." : "Beginning of leave is not changed.");
                 }
 
                 Console.WriteLine("Put date of end of leave (or put any letter to skip)");
@@ -744,10 +737,17 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 FillUpLeaveLimitsForFutureYears(employee, leave.DateTo.Year);
             }
 
+            //// *** Asynchronous Calls! ***
+            //if (!await CheckOverlappingAsync(leave))
+            //{
+            //    Console.WriteLine("Leave cannot be added. Try again with correct dates.");
+            //    return false;
+            //}
+
             return true;
         }
 
-        public void AddLeave(int employeeId)
+        public async Task AddLeaveAsync(int employeeId)
         {
             if (!EmployeeExists(employeeId))
             {
@@ -756,15 +756,16 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 
             Employee employee = Employees.FirstOrDefault(e => e.Id == employeeId);
 
-            int lastAddedLeaveId = allLeavesInStorage.Leaves.Count == 0 ? 0 : allLeavesInStorage.Leaves.LastOrDefault().Id;
+            int lastAddedLeaveId = (await _leaveRepository.GetAllLeavesAsync()).Count == 0 ?
+                                    0 : (await _leaveRepository.GetAllLeavesAsync()).LastOrDefault()?.Id ?? 0;
             Leave leave = new(employeeId, lastAddedLeaveId + 1, true);
 
-            if (!GetNewDatesOfLeave(leave, employee, true))
+            if (!await GetNewDatesOfLeaveAsync(leave, employee, true)) 
             {
                 return;
             }
 
-            if (!allLeavesInStorage.CheckOverlapping(leave))
+            if (!await _leaveManagementService.CheckOverlappingAsync(leave))
             {
                 Console.WriteLine("Leave cannot be added. Try again with correct dates.");
                 return;
@@ -772,20 +773,20 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 
             if (leave.HowManyCalendarYearsLeaveSpans() == 1)
             {
-                bool ableOnDemand = false;
-                _ = IsOnDemandLimitSatisfied(employee, leave.GetLeaveLength()) ? ableOnDemand = true : false;
+                bool ableOnDemand = await IsOnDemandLimitSatisfiedAsync(employee, leave.GetLeaveLength());
 
-                allLeavesInStorage.AddLeave(leave, ableOnDemand);
-                allLeavesInStorage.SplitLeaveIntoConsecutiveBusinessDaysBits(leave);
+                await _leaveManagementService.AddLeaveAsync(leave, ableOnDemand);
+                await _leaveManagementService.SplitLeaveIntoConsecutiveBusinessDaysBitsAsync(leave);
 
-                ShowLeaveAvailableForAllPastYears(employee); //TEST PURPOSE
+                //ShowLeaveAvailableForAllPastYears(employee); //TEST PURPOSE - consider if you still need this
 
-                if (!IsLeaveLimitPolicySatisfied(employee, leave.DateTo.Year))
+                if (!await IsLeaveLimitPolicySatisfiedAsync(employee, leave.DateTo.Year))
                 {
-                    int nowLastAddedLeaveId = allLeavesInStorage.Leaves.Count == 0 ? 0 : allLeavesInStorage.Leaves.Last().Id;
+                    int nowLastAddedLeaveId = (await _leaveRepository.GetAllLeavesAsync()).Count == 0 ?
+                                            0 : (await _leaveRepository.GetAllLeavesAsync()).Last().Id;
                     for (int i = leave.Id; i <= nowLastAddedLeaveId; i++)
                     {
-                        RemoveLeave(i);
+                        await _leaveManagementService.RemoveLeaveAsync(i);
                     }
                     Console.WriteLine("Leave is not added. Leave limit policy is violated.");
                 }
@@ -796,60 +797,60 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 firstLeave.DateFrom = leave.DateFrom;
                 firstLeave.DateTo = new DateTime(firstLeave.DateFrom.Year, 12, 31);
 
-                bool firstLeaveAbleOnDemand = false;
-                _ = IsOnDemandLimitSatisfied(employee, firstLeave.GetLeaveLength()) ? firstLeaveAbleOnDemand = true : false;
+                bool firstLeaveAbleOnDemand = await IsOnDemandLimitSatisfiedAsync(employee, firstLeave.GetLeaveLength());
 
-                allLeavesInStorage.AddLeave(firstLeave, firstLeaveAbleOnDemand);
-                allLeavesInStorage.SplitLeaveIntoConsecutiveBusinessDaysBits(firstLeave);
+                await _leaveManagementService.AddLeaveAsync(firstLeave, firstLeaveAbleOnDemand);
+                await _leaveManagementService.SplitLeaveIntoConsecutiveBusinessDaysBitsAsync(firstLeave);
 
-                int secondLeaveLastAddedLeaveId = allLeavesInStorage.Leaves.Count == 0 ? 0 : allLeavesInStorage.Leaves.LastOrDefault().Id;
+                int secondLeaveLastAddedLeaveId = (await _leaveRepository.GetAllLeavesAsync()).Count == 0 ?
+                                                   0 : (await _leaveRepository.GetAllLeavesAsync()).LastOrDefault()?.Id ?? 0;
                 Leave secondLeave = new(employee.Id, secondLeaveLastAddedLeaveId + 1, true);
                 secondLeave.DateTo = leave.DateTo;
                 secondLeave.DateFrom = new DateTime(secondLeave.DateTo.Year, 1, 1);
 
-                bool secondLeaveAbleOnDemand = false;
-                _ = IsOnDemandLimitSatisfied(employee, secondLeave.GetLeaveLength()) ? secondLeaveAbleOnDemand = true : false;
+                bool secondLeaveAbleOnDemand = await IsOnDemandLimitSatisfiedAsync(employee, secondLeave.GetLeaveLength());
 
-                allLeavesInStorage.AddLeave(secondLeave, secondLeaveAbleOnDemand);
-                allLeavesInStorage.SplitLeaveIntoConsecutiveBusinessDaysBits(secondLeave);
+                await _leaveManagementService.AddLeaveAsync(secondLeave, secondLeaveAbleOnDemand);
+                await _leaveManagementService.SplitLeaveIntoConsecutiveBusinessDaysBitsAsync(secondLeave);
 
-                ShowLeaveAvailableForAllPastYears(employee); //TEST PURPOSE
+                //ShowLeaveAvailableForAllPastYears(employee); //TEST PURPOSE - consider if you still need this
 
-                if (!IsLeaveLimitPolicySatisfied(employee, leave.DateTo.Year))
+                if (!await IsLeaveLimitPolicySatisfiedAsync(employee, leave.DateTo.Year))
                 {
-                    int nowLastAddedLeaveId = allLeavesInStorage.Leaves.Count == 0 ? 0 : allLeavesInStorage.Leaves.Last().Id;
+                    int nowLastAddedLeaveId = (await _leaveRepository.GetAllLeavesAsync()).Count == 0 ?
+                                            0 : (await _leaveRepository.GetAllLeavesAsync()).Last().Id;
                     for (int i = leave.Id; i <= nowLastAddedLeaveId; i++)
                     {
-                        RemoveLeave(i);
+                        await _leaveManagementService.RemoveLeaveAsync(i);
                     }
                     Console.WriteLine("Leave is not added. Leave limit policy is violated.");
                 }
             }
         }
 
-        public void DisplayAllLeaves()
+        public async Task DisplayAllLeavesAsync()
         {
-            allLeavesInStorage.DisplayAllLeaves();
+            await _leaveManagementService.DisplayAllLeavesAsync();
         }
 
-        public void DisplayAllLeavesOnDemand()
+        public async Task DisplayAllLeavesOnDemandAsync()
         {
-            allLeavesInStorage.DisplayAllLeavesOnDemand();
+            await _leaveManagementService.DisplayAllLeavesOnDemandAsync();
         }
 
-        public void DisplayAllLeavesForEmployee(int employeeId)
+        public async Task DisplayAllLeavesForEmployeeAsync(int employeeId)
         {
-            allLeavesInStorage.DisplayAllLeavesForEmployee(employeeId);
+            await _leaveManagementService.DisplayAllLeavesForEmployeeAsync(employeeId);
         }
 
-        public void DisplayAllLeavesForEmployeeOnDemand(int employeeId)
+        public async Task DisplayAllLeavesForEmployeeOnDemandAsync(int employeeId)
         {
-            allLeavesInStorage.DisplayAllLeavesForEmployeeOnDemand(employeeId);
+            await _leaveManagementService.DisplayAllLeavesForEmployeeOnDemandAsync(employeeId);
         }
 
-        public void RemoveLeave(int leaveIdToRemove)
+        public async Task RemoveLeaveAsync(int leaveIdToRemove)
         {
-            Leave leave = allLeavesInStorage.Leaves.FirstOrDefault(l => l.Id == leaveIdToRemove);
+            Leave leave = (await _leaveRepository.GetAllLeavesAsync()).FirstOrDefault(l => l.Id == leaveIdToRemove);
 
             if (leaveIdToRemove == null)
             {
@@ -857,13 +858,14 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 return;
             }
 
-            allLeavesInStorage.RemoveLeave(leaveIdToRemove);
+            await _leaveManagementService.RemoveLeaveAsync(leaveIdToRemove);
         }
 
-        public void EditLeave(int intOfLeaveToEdit)
+        public async Task EditLeaveAsync(int intOfLeaveToEdit)
         {
-            var leaveToEdit = allLeavesInStorage.Leaves.FirstOrDefault(l => l.Id == intOfLeaveToEdit);
-            int leaveIdAfterEdit = allLeavesInStorage.Leaves.Last().Id + 1;
+            var leaveToEdit = (await _leaveRepository.GetAllLeavesAsync()).FirstOrDefault(l => l.Id == intOfLeaveToEdit);
+            int leaveIdAfterEdit = (await _leaveRepository.GetAllLeavesAsync()).Count > 0 ?
+                                   (await _leaveRepository.GetAllLeavesAsync()).Last().Id + 1 : 1;
 
             if (leaveToEdit == null)
             {
@@ -879,16 +881,16 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 IsOnDemand = leaveToEdit.IsOnDemand
             };
 
-            if (!GetNewDatesOfLeave(leaveAuxiliary, employee, false))
+            if (!await GetNewDatesOfLeaveAsync(leaveAuxiliary, employee, false))
             {
                 return;
             }
 
-            allLeavesInStorage.RemoveLeave(intOfLeaveToEdit);
+            await _leaveManagementService.RemoveLeaveAsync(intOfLeaveToEdit);
 
-            if (!allLeavesInStorage.CheckOverlapping(leaveAuxiliary))
+            if (!await _leaveManagementService.CheckOverlappingAsync(leaveAuxiliary))
             {
-                allLeavesInStorage.AddLeave(leaveToEdit, false);
+                await _leaveManagementService.AddLeaveAsync(leaveToEdit, false);
                 Console.WriteLine("Leave cannot be added. Try again with correct dates.");
                 return;
             }
@@ -899,52 +901,51 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 return;
             }
 
-            bool ableOnDemand = false;
-            _ = IsOnDemandLimitSatisfied(employee, leaveAuxiliary.GetLeaveLength()) ? ableOnDemand = true : false;
+            bool ableOnDemand = await IsOnDemandLimitSatisfiedAsync(employee, leaveAuxiliary.GetLeaveLength());
 
             if (leaveToEdit.IsOnDemand && ableOnDemand == false)
             {
-                Console.WriteLine("The edited leave is On Demand. Yet after change it will not be possible due to exceeding On Demand leave limit per year. Do you want to proceeed and keep the leave as NOT On Demand? (put y if yes)");
+                Console.WriteLine("The edited leave is On Demand. Yet after change it will not be possible due to exceeding On Demand leave limit per year. Do you want to proceed and keep the leave as NOT On Demand? (put y if yes)");
                 if (Console.ReadLine() == "y")
                 {
                     leaveAuxiliary.IsOnDemand = false;
-                    allLeavesInStorage.AddLeave(leaveAuxiliary, ableOnDemand);
-                    allLeavesInStorage.SplitLeaveIntoConsecutiveBusinessDaysBits(leaveAuxiliary);
-                    ShowLeaveAvailableForAllPastYears(employee); //TEST PURPOSE
+                    await _leaveManagementService.AddLeaveAsync(leaveAuxiliary, ableOnDemand);
+                    await _leaveManagementService.SplitLeaveIntoConsecutiveBusinessDaysBitsAsync(leaveAuxiliary);
+                    //ShowLeaveAvailableForAllPastYears(employee); //TEST PURPOSE
 
-                    if (!IsLeaveLimitPolicySatisfied(employee, leaveAuxiliary.DateTo.Year))
+                    if (!await IsLeaveLimitPolicySatisfiedAsync(employee, leaveAuxiliary.DateTo.Year))
                     {
-                        int lastLeaveIdNow = allLeavesInStorage.Leaves.Last().Id;
+                        int lastLeaveIdNow = (await _leaveRepository.GetAllLeavesAsync()).Last().Id;
                         for (int i = leaveIdAfterEdit; i <= lastLeaveIdNow; i++)
                         {
-                            allLeavesInStorage.RemoveLeave(i);
+                            await _leaveManagementService.RemoveLeaveAsync(i);
                         }
 
-                        allLeavesInStorage.AddLeave(leaveToEdit, false);
+                        await _leaveManagementService.AddLeaveAsync(leaveToEdit, false);
                         Console.WriteLine("Leave cannot be changed. Leave limit policy is violated.");
                     }
                 }
                 else
                 {
-                    allLeavesInStorage.AddLeave(leaveToEdit, false);
+                    await _leaveManagementService.AddLeaveAsync(leaveToEdit, false);
                     Console.WriteLine("Leave is not changed.");
                 }
             }
             else
             {
-                allLeavesInStorage.AddLeave(leaveAuxiliary, ableOnDemand);
-                allLeavesInStorage.SplitLeaveIntoConsecutiveBusinessDaysBits(leaveAuxiliary);
-                ShowLeaveAvailableForAllPastYears(employee); //TEST PURPOSE
+                await _leaveManagementService.AddLeaveAsync(leaveAuxiliary, ableOnDemand);
+                await _leaveManagementService.SplitLeaveIntoConsecutiveBusinessDaysBitsAsync(leaveAuxiliary);
+                //ShowLeaveAvailableForAllPastYears(employee); //TEST PURPOSE
 
-                if (!IsLeaveLimitPolicySatisfied(employee, leaveAuxiliary.DateTo.Year))
+                if (!await IsLeaveLimitPolicySatisfiedAsync(employee, leaveAuxiliary.DateTo.Year))
                 {
-                    int lastLeaveIdNow = allLeavesInStorage.Leaves.Last().Id;
+                    int lastLeaveIdNow = (await _leaveRepository.GetAllLeavesAsync()).Last().Id;
                     for (int i = leaveIdAfterEdit; i <= lastLeaveIdNow; i++)
                     {
-                        allLeavesInStorage.RemoveLeave(i);
+                        await _leaveManagementService.RemoveLeaveAsync(i);
                     }
 
-                    allLeavesInStorage.AddLeave(leaveToEdit, false);
+                    await _leaveManagementService.AddLeaveAsync(leaveToEdit, false);
                     Console.WriteLine("Leave cannot be changed. Leave limit policy is violated.");
                 }
             }

@@ -3,6 +3,10 @@ using Leave_Manager.Leave_Manager.Core.Entities;
 using Leave_Manager.Leave_Manager.Core.Interfaces;
 using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Leave_Manager.Leave_Manager.Core.Services
 {
@@ -13,19 +17,13 @@ namespace Leave_Manager.Leave_Manager.Core.Services
 
         public LeaveManagementService(LMDbContext context)
         {
-            // Check if 'context' is null and throw an exception
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context), "Database context cannot be null.");
-            }
-
-            _context = context;
-            Leaves = _context.Leaves.ToList();
+            _context = context ?? throw new ArgumentNullException(nameof(context), "Database context cannot be null.");
+            Leaves = _context.Leaves.ToList(); // You might want to make this asynchronous in the future
         }
 
-        public List<Leave> GetAllLeaves()
+        public async Task<List<Leave>> GetAllLeavesAsync()
         {
-            var allLeaves = _context.Leaves.ToList();
+            var allLeaves = await _context.Leaves.ToListAsync();
 
             if (allLeaves.Any())
             {
@@ -38,11 +36,9 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             return allLeaves;
         }
 
-        private void AddLeaveLastPart(Leave leave)
+        private async Task AddLeaveLastPartAsync(Leave leave)
         {
-            Leave leaveHere;
-            int newLeaveId;
-            leaveHere = new Leave()
+            Leave leaveHere = new Leave()
             {
                 EmployeeId = leave.EmployeeId,
                 DateFrom = leave.DateFrom,
@@ -50,71 +46,68 @@ namespace Leave_Manager.Leave_Manager.Core.Services
                 IsOnDemand = leave.IsOnDemand
             };
 
-            _context.Leaves.Add(leaveHere);
-            _context.SaveChanges();
-            newLeaveId = leaveHere.Id;
-            leave.Id = newLeaveId;
+            await _context.Leaves.AddAsync(leaveHere);
+            await _context.SaveChangesAsync();
+            leave.Id = leaveHere.Id;
             _context.Entry(leaveHere).State = EntityState.Detached;
 
             Leaves.Add(leave);
         }
 
-        private void RemoveLeaveLastPart(Leave leave)
+        private async Task RemoveLeaveLastPartAsync(Leave leave)
         {
             _context.Leaves.Remove(leave);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             Leaves.Remove(leave);
         }
 
-        internal void SplitLeaveIntoConsecutiveBusinessDaysBits(Leave leave)
+        public async Task SplitLeaveIntoConsecutiveBusinessDaysBitsAsync(Leave leave)
         {
             int leaveId = leave.Id;
-            int employeeeId = leave.EmployeeId;
+            int employeeId = leave.EmployeeId;
             DateTime dateFrom = leave.DateFrom;
             DateTime dateTo = leave.DateTo;
             bool isOnDemand = leave.IsOnDemand;
-            RemoveLeave(leaveId);
+            await RemoveLeaveAsync(leaveId);
+
             WorkDaysCalculator workDaysCalculator = new();
             List<List<DateTime>> listOfLeaves = workDaysCalculator.GetUninterruptedWorkDays(dateFrom, dateTo);
 
             int i = 0;
             foreach (var uninterruptedRange in listOfLeaves)
             {
-                Leave leaveHere = new(employeeeId, false);
+                Leave leaveHere = new(employeeId, false);
                 leaveHere.IsOnDemand = isOnDemand;
                 leaveHere.DateFrom = uninterruptedRange.First();
                 leaveHere.DateTo = uninterruptedRange.Last();
 
-                AddLeaveLastPart(leaveHere);
+                await AddLeaveLastPartAsync(leaveHere);
                 i++;
             }
         }
 
-        internal int GetLastLeaveYearOfEmployee(int employeeId)
+        public async Task<int> GetLastLeaveYearOfEmployeeAsync(int employeeId)
         {
-            int year;
-
-            var leaves = Leaves.Where(l => l.EmployeeId == employeeId).ToList();
+            var leaves = await _context.Leaves
+                .Where(l => l.EmployeeId == employeeId)
+                .ToListAsync();
 
             if (leaves.Count == 0)
             {
-                year = 0;
-            }
-            else
-            {
-                DateTime lastLeaveDate = leaves.Max(l => l.DateTo);
-                year = lastLeaveDate.Year;
+                return 0;
             }
 
-            return year;
+            DateTime lastLeaveDate = leaves.Max(l => l.DateTo);
+            return lastLeaveDate.Year;
         }
 
-        public bool CheckOverlapping(Leave leave)
+        public async Task<bool> CheckOverlappingAsync(Leave leave)
         {
-            List<Leave> leavesOverlapping = Leaves.Where
-                (l => l.EmployeeId == leave.EmployeeId).Where
-                (l => l.DateTo >= leave.DateFrom).Where
-                (l => l.DateFrom <= leave.DateTo).ToList();
+            var leavesOverlapping = await _context.Leaves
+                .Where(l => l.EmployeeId == leave.EmployeeId)
+                .Where(l => l.DateTo >= leave.DateFrom)
+                .Where(l => l.DateFrom <= leave.DateTo)
+                .ToListAsync();
 
             if (leavesOverlapping.Count > 0)
             {
@@ -128,21 +121,21 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             return true;
         }
 
-        public void AddLeave(Leave leave, bool askIfOnDemand)
+        public async Task AddLeaveAsync(Leave leave, bool askIfOnDemand)
         {
-            if (leave.DateFrom.Year == DateTime.Now.Year && askIfOnDemand == true)
+            if (leave.DateFrom.Year == DateTime.Now.Year && askIfOnDemand)
             {
                 Console.WriteLine("Is this leave On Demand? (click y to nod or n to deny or enter to skip)");
 
                 string input = Console.ReadLine();
 
-                bool _ = input == "y" ? (leave.IsOnDemand = true) : input == "n" ? leave.IsOnDemand = false : true;
+                _ = input == "y" ? (leave.IsOnDemand = true) : input == "n" ? leave.IsOnDemand = false : true;
             }
 
-            AddLeaveLastPart(leave);
+            await AddLeaveLastPartAsync(leave);
         }
 
-        public void RemoveLeave(int intOfLeaveToRemove)
+        public async Task RemoveLeaveAsync(int intOfLeaveToRemove)
         {
             var leaveToRemove = Leaves.FirstOrDefault(c => c.Id == intOfLeaveToRemove);
             if (leaveToRemove == null)
@@ -151,61 +144,60 @@ namespace Leave_Manager.Leave_Manager.Core.Services
             }
             else
             {
-                RemoveLeaveLastPart(leaveToRemove);
+                await RemoveLeaveLastPartAsync(leaveToRemove);
             }
         }
 
-        public void DisplayAllLeaves()
+        public async Task DisplayAllLeavesAsync()
         {
-            AuxiliaryMethods.DisplayLeaves(Leaves);
+            var leaves = await GetAllLeavesAsync();
+            AuxiliaryMethods.DisplayLeaves(leaves);
         }
 
-        public void DisplayAllLeavesOnDemand()
+        public async Task DisplayAllLeavesOnDemandAsync()
         {
-            var onDemandLeaves = Leaves.Where(l => l.IsOnDemand).ToList();
+            var onDemandLeaves = await _context.Leaves
+                .Where(l => l.IsOnDemand)
+                .ToListAsync();
             AuxiliaryMethods.DisplayLeaves(onDemandLeaves);
         }
 
-        public void DisplayAllLeavesForEmployee(int employeeId)
+        public async Task DisplayAllLeavesForEmployeeAsync(int employeeId)
         {
-            var leavesOfEmployee = Leaves.Where(l => l.EmployeeId == employeeId).ToList();
+            var leavesOfEmployee = await _context.Leaves
+                .Where(l => l.EmployeeId == employeeId)
+                .ToListAsync();
             AuxiliaryMethods.DisplayLeaves(leavesOfEmployee);
         }
 
-        public void DisplayAllLeavesForEmployeeOnDemand(int employeeId)
+        public async Task DisplayAllLeavesForEmployeeOnDemandAsync(int employeeId)
         {
-            var leavesOfEmployeeOnDemand = Leaves.Where
-                (l => l.EmployeeId == employeeId).Where
-                (l => l.IsOnDemand).ToList();
+            var leavesOfEmployeeOnDemand = await _context.Leaves
+                .Where(l => l.EmployeeId == employeeId)
+                .Where(l => l.IsOnDemand)
+                .ToListAsync();
             AuxiliaryMethods.DisplayLeaves(leavesOfEmployeeOnDemand);
         }
 
-        public int GetSumOfDaysOnLeaveTakenByEmployeeInYear(int employeeId, int year)
+        public async Task<int> GetSumOfDaysOnLeaveTakenByEmployeeInYearAsync(int employeeId, int year)
         {
-            var sumOfLeaveDays = 0;
-            foreach (var leave in Leaves)
-            {
-                if (leave.EmployeeId == employeeId && leave.DateFrom.Year == year)
-                {
-                    sumOfLeaveDays += leave.GetLeaveLength();
-                }
-            }
-            return sumOfLeaveDays;
+            var leaves = await _context.Leaves
+                .Where(l => l.EmployeeId == employeeId && l.DateFrom.Year == year)
+                .ToListAsync();
+
+            return leaves.Sum(l => l.GetLeaveLength());
         }
 
-        public int GetSumOnDemand(int employeeId)
+        public async Task<int> GetSumOnDemandAsync(int employeeId)
         {
-            var sumOfOnDemandDays = 0;
-            foreach (Leave leave in Leaves)
-            {
-                if (leave.EmployeeId == employeeId && leave.DateFrom.Year == DateTime.Now.Year && leave.IsOnDemand == true)
-                {
-                    sumOfOnDemandDays += leave.GetLeaveLength();
-                }
-            }
-            return sumOfOnDemandDays;
+            var leaves = await _context.Leaves
+                .Where(l => l.EmployeeId == employeeId && l.IsOnDemand)
+                .ToListAsync();
+
+            return leaves.Sum(l => l.GetLeaveLength());
         }
 
+        // You can keep this synchronous for now if it's not causing performance issues.
         public int CountSumOfPastYearLeaveDays(int employeeId, int year)
         {
             int sumOfPreviousYearLeaveDays = 0;

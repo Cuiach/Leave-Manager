@@ -4,7 +4,7 @@ namespace Leave_Manager.Leave_Manager.Core.Interfaces
 {
     public interface IEmployeeRepository
     {
-        int AddEmployeeSync(Employee employee);
+        Task<int> AddEmployeeAsync(Employee employee);
         Task DeleteEmployeeAsync(int id);
         List<Employee> GetAllEmployeesSync();
         Task<Employee?> GetEmployeeByIdAsync(int id);

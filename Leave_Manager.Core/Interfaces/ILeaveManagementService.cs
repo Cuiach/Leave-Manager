@@ -4,16 +4,20 @@ namespace Leave_Manager.Leave_Manager.Core.Interfaces
 {
     public interface ILeaveManagementService
     {
-        List<Leave> GetAllLeaves();
-        void AddLeave(Leave leave, bool askIfOnDemand);
-        bool CheckOverlapping(Leave leave);
+        List<Leave> Leaves { get; }
+
+        Task AddLeaveAsync(Leave leave, bool askIfOnDemand);
+        Task<bool> CheckOverlappingAsync(Leave leave);
         int CountSumOfPastYearLeaveDays(int employeeId, int year);
-        void DisplayAllLeaves();
-        void DisplayAllLeavesForEmployee(int employeeId);
-        void DisplayAllLeavesForEmployeeOnDemand(int employeeId);
-        void DisplayAllLeavesOnDemand();
-        int GetSumOfDaysOnLeaveTakenByEmployeeInYear(int employeeId, int year);
-        int GetSumOnDemand(int employeeId);
-        void RemoveLeave(int intOfLeaveToRemove);
+        Task DisplayAllLeavesAsync();
+        Task DisplayAllLeavesForEmployeeAsync(int employeeId);
+        Task DisplayAllLeavesForEmployeeOnDemandAsync(int employeeId);
+        Task DisplayAllLeavesOnDemandAsync();
+        Task<List<Leave>> GetAllLeavesAsync();
+        Task<int> GetLastLeaveYearOfEmployeeAsync(int employeeId);
+        Task<int> GetSumOfDaysOnLeaveTakenByEmployeeInYearAsync(int employeeId, int year);
+        Task<int> GetSumOnDemandAsync(int employeeId);
+        Task RemoveLeaveAsync(int intOfLeaveToRemove);
+        Task SplitLeaveIntoConsecutiveBusinessDaysBitsAsync(Leave leave);
     }
 }

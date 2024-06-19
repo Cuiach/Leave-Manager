@@ -1,5 +1,4 @@
 ﻿using Leave_Manager.Application;
-using Leave_Manager.Leave_Manager.ConsoleApp.Presentation;
 using Leave_Manager.Leave_Manager.Core.Interfaces;
 using Leave_Manager.Leave_Manager.Core.Services;
 using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
@@ -16,6 +15,7 @@ serviceCollection.AddDbContext<LMDbContext>(options =>
 serviceCollection.AddScoped<ILeaveManagementService, LeaveManagementService>(); 
 serviceCollection.AddScoped<IListOfEmployeesService, ListOfEmployeesService>();
 serviceCollection.AddScoped<IEmployeeRepository, EmployeeRepository>();
+serviceCollection.AddScoped<ILeaveRepository, LeaveRepository>();
 serviceCollection.AddScoped<Application>();
 
 //  Build ServiceProvider
@@ -43,22 +43,22 @@ while (true)
             Menus.ShowMainMenu();
             break;
         case "1":
-            application.AddEmployee();
+            await application.AddEmployeeAsync();
             break;
         case "2":
-            application.DisplayAllEmployees();
+            await application.DisplayAllEmployeesAsync();
             break;
         case "3":
             Console.WriteLine("Insert search phrase");
             var searchPhrase = (Console.ReadLine() ?? ""); //null checker
-            application.DisplayMatchingEmployees(searchPhrase);
+            await application.DisplayMatchingEmployeesAsync(searchPhrase);
             break;
         case "4":
             Console.Write("Employee - ");
             int intToRemove = AuxiliaryMethods.GetId();
             if (intToRemove != 0)
             {
-                application.RemoveEmployee(intToRemove);
+                await application.RemoveEmployeeAsync(intToRemove);
             }
             break;
         case "5":
@@ -66,21 +66,21 @@ while (true)
             int employeeId = AuxiliaryMethods.GetId();
             if (employeeId != 0)
             {
-                application.AddLeave(employeeId);
+                await application.AddLeaveAsync(employeeId);
             }
             break;
         case "6":
-            application.DisplayAllLeaves();
+            await application.DisplayAllLeavesAsync();
             break;
         case "6D":
-            application.DisplayAllLeavesOnDemand();
+            await application.DisplayAllLeavesOnDemandAsync();
             break;
         case "6E":
             Console.Write("Employee - ");
             employeeId = AuxiliaryMethods.GetId();
             if (employeeId != 0)
             {
-                application.DisplayAllLeavesForEmployee(employeeId);
+                await application.DisplayAllLeavesForEmployeeAsync(employeeId);
             }
             break;
         case "6ED":
@@ -89,7 +89,7 @@ while (true)
             employeeId = AuxiliaryMethods.GetId();
             if (employeeId != 0)
             {
-                application.DisplayAllLeavesForEmployeeOnDemand(employeeId);
+                await application.DisplayAllLeavesForEmployeeOnDemandAsync(employeeId);
             }
             break;
         case "7":
@@ -97,7 +97,7 @@ while (true)
             int intOfLeaveToRemove = AuxiliaryMethods.GetId();
             if (intOfLeaveToRemove != 0)
             {
-                application.RemoveLeave(intOfLeaveToRemove);
+                await application.RemoveLeaveAsync(intOfLeaveToRemove);
             }
             break;
         case "8":
@@ -105,7 +105,7 @@ while (true)
             int intOfLeaveToEdit = AuxiliaryMethods.GetId();
             if (intOfLeaveToEdit != 0)
             {
-                application.EditLeave(intOfLeaveToEdit);
+                await application.EditLeaveAsync(intOfLeaveToEdit);
             }
             break;
         case "9":
@@ -113,7 +113,7 @@ while (true)
             int intOfEmployeeToEdit = AuxiliaryMethods.GetId();
             if (intOfEmployeeToEdit != 0)
             {
-                application.EditSettings(intOfEmployeeToEdit);
+                await application.EditSettingsAsync(intOfEmployeeToEdit);
             }
             break;
         case "x":

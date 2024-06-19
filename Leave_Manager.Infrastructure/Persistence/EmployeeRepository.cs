@@ -1,6 +1,9 @@
 ﻿using Leave_Manager.Leave_Manager.Core.Entities;
 using Leave_Manager.Leave_Manager.Core.Interfaces;
+using Leave_Manager.Leave_Manager.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Leave_Manager.Leave_Manager.Infrastructure.Persistence
 {
@@ -23,10 +26,10 @@ namespace Leave_Manager.Leave_Manager.Infrastructure.Persistence
             return await _context.Employees.FindAsync(id);
         }
 
-        public int AddEmployeeSync(Employee employee)
+        public async Task<int> AddEmployeeAsync(Employee employee)
         {
-            _context.Employees.Add(employee);
-            _context.SaveChanges();
+            await _context.Employees.AddAsync(employee);
+            await _context.SaveChangesAsync();
             return employee.Id;
         }
 
